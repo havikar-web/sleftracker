@@ -107,7 +107,7 @@ export function getStatusBadge(status: string): { label: string; class: string }
     case "MASTERED":
       return { label: "Mastered", class: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" };
     case "NEEDS_REVISION":
-      return { label: "Needs Revision", class: "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30" };
+      return { label: "⚠️ Needs Revision (Forgotten)", class: "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/40 font-bold" };
     default:
       return { label: status, class: "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-300 dark:border-zinc-700" };
   }

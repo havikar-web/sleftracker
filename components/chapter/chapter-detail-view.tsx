@@ -25,6 +25,7 @@ import { cn, getSubjectColor, getStatusBadge, getPriorityLabel } from "@/lib/uti
 import { cycleTopicStatus, updateChapterManualProgress } from "@/lib/actions/chapter-actions";
 import { logPracticeSession } from "@/lib/actions/practice-actions";
 import { setActiveWeeklyTargetChapter } from "@/lib/actions/task-actions";
+import { markChapterNeedsRevision } from "@/lib/actions/revision-actions";
 import { QuickPracticeModal } from "@/components/modals/quick-practice-modal";
 import { useTimer } from "@/components/timer-context";
 import { ProgressCircle } from "@/components/ui/progress-circle";
@@ -50,11 +51,19 @@ export function ChapterDetailView({
   const [practiceModalOpen, setPracticeModalOpen] = useState(false);
   const [liveReadiness, setLiveReadiness] = useState(readiness.readinessScore || 0);
   const [liveQuestionsSolved, setLiveQuestionsSolved] = useState(progress?.questionsSolved || 0);
+  const [currentStatus, setCurrentStatus] = useState(readiness.status || "NOT_STARTED");
   const { startTimer } = useTimer();
 
   const colors = getSubjectColor(chapter.subject.name);
-  const statusBadge = getStatusBadge(readiness.status);
+  const statusBadge = getStatusBadge(currentStatus);
   const priorityBadge = getPriorityLabel(priority.priorityTier);
+
+  const handleMarkNeedsRevision = async () => {
+    setCurrentStatus("NEEDS_REVISION");
+    setLiveReadiness(40);
+    await markChapterNeedsRevision(chapter.id);
+    alert(`⚠️ Marked "${chapter.name}" as Needs Revision (Studied, but Forgotten). Scheduled in your Revision Center!`);
+  };
 
   // 1-click topic cycle
   const handleTopicClick = async (topicId: string) => {
@@ -188,6 +197,20 @@ export function ChapterDetailView({
               >
                 <Target className="w-3.5 h-3.5" /> Set as Week Target
               </button>
+
+              <button
+                onClick={handleMarkNeedsRevision}
+                className={cn(
+                  "flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl transition-colors shadow-sm active:scale-95 border",
+                  currentStatus === "NEEDS_REVISION"
+                    ? "bg-amber-500 text-white border-amber-600 font-bold"
+                    : "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 hover:bg-amber-100 border-amber-300 dark:border-amber-800/60"
+                )}
+                title="Studied before, but forgotten key concepts or formulas"
+              >
+                <RotateCcw className="w-3.5 h-3.5" /> Need to Revise (Forgotten)
+              </button>
+
               <button
                 onClick={() => setPracticeModalOpen(true)}
                 className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 border border-emerald-300 dark:border-emerald-800/60 rounded-xl transition-colors shadow-sm active:scale-95"

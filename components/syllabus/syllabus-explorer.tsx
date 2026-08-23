@@ -14,11 +14,13 @@ import {
   Zap,
   SlidersHorizontal,
   ArrowUpDown,
+  AlertTriangle,
 } from "lucide-react";
 import { cn, getSubjectColor, getStatusBadge, getPriorityLabel } from "@/lib/utils";
 import { updateChapterManualProgress } from "@/lib/actions/chapter-actions";
 import { logPracticeSession } from "@/lib/actions/practice-actions";
 import { setActiveWeeklyTargetChapter } from "@/lib/actions/task-actions";
+import { markChapterNeedsRevision } from "@/lib/actions/revision-actions";
 import { ProgressCircle } from "@/components/ui/progress-circle";
 
 export function SyllabusExplorer({ subjects }: { subjects: any[] }) {
@@ -42,6 +44,7 @@ export function SyllabusExplorer({ subjects }: { subjects: any[] }) {
   // Quick 1-click status updater directly from syllabus list
   const handleQuickStatusChange = async (chapter: any, newStatus: string) => {
     let score = 0;
+    if (newStatus === "NEEDS_REVISION") score = 40;
     if (newStatus === "LEARNING") score = 25;
     if (newStatus === "PRACTISING") score = 50;
     if (newStatus === "DEVELOPING") score = 70;
@@ -57,18 +60,22 @@ export function SyllabusExplorer({ subjects }: { subjects: any[] }) {
       },
     }));
 
-    await updateChapterManualProgress({
-      chapterId: chapter.id,
-      theoryScore: score,
-      questionsSolved: Math.max(10, chapter.progress[0]?.questionsSolved || 0),
-      pyqsSolved: Math.max(5, chapter.progress[0]?.pyqsSolved || 0),
-      correctIndependent: Math.max(8, chapter.progress[0]?.correctIndependent || 0),
-      wrong: 2,
-      assisted: 1,
-      isManualOverride: true,
-      readinessOverride: score,
-      statusOverride: newStatus,
-    });
+    if (newStatus === "NEEDS_REVISION") {
+      await markChapterNeedsRevision(chapter.id);
+    } else {
+      await updateChapterManualProgress({
+        chapterId: chapter.id,
+        theoryScore: score,
+        questionsSolved: Math.max(10, chapter.progress[0]?.questionsSolved || 0),
+        pyqsSolved: Math.max(5, chapter.progress[0]?.pyqsSolved || 0),
+        correctIndependent: Math.max(8, chapter.progress[0]?.correctIndependent || 0),
+        wrong: 2,
+        assisted: 1,
+        isManualOverride: true,
+        readinessOverride: score,
+        statusOverride: newStatus,
+      });
+    }
   };
 
   // Quick 1-click +10 Questions directly on chapter
@@ -107,6 +114,7 @@ export function SyllabusExplorer({ subjects }: { subjects: any[] }) {
 
       // Status filters
       if (filterStatus === "NOT_STARTED" && status !== "NOT_STARTED") return false;
+      if (filterStatus === "NEEDS_REVISION" && status !== "NEEDS_REVISION") return false;
       if (filterStatus === "ACTIVE" && (status === "NOT_STARTED" || status === "MASTERED")) return false;
       if (filterStatus === "MASTERED" && status !== "MASTERED") return false;
       if (filterStatus === "TEST_READY" && status !== "TEST_READY") return false;
@@ -163,7 +171,7 @@ export function SyllabusExplorer({ subjects }: { subjects: any[] }) {
             Official JEE Syllabus Tree
           </h1>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-            Filter by weightage, priority ROI, class level & readiness • 1-tap instant progress updating
+            Filter by weightage, priority ROI, class level & readiness • Track forgotten chapters with &quot;Needs Revision&quot;
           </p>
         </div>
 
@@ -212,7 +220,7 @@ export function SyllabusExplorer({ subjects }: { subjects: any[] }) {
           <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-2.5" />
           <input
             type="text"
-            placeholder="Search chapters or subtopics (e.g. 'Newton', 'Satellites', 'GOC')..."
+            placeholder="Search chapters or subtopics (e.g. 'Newton', 'Satellites', 'GOC', 'Calculus')..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-9 pr-3 py-2 text-xs bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 rounded-xl text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-hidden focus:border-blue-500 shadow-sm"
@@ -286,6 +294,7 @@ export function SyllabusExplorer({ subjects }: { subjects: any[] }) {
           <span className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider mr-1">Status:</span>
           {[
             { id: "ALL", label: "All Statuses" },
+            { id: "NEEDS_REVISION", label: "⚠️ Needs Revision (Forgotten)" },
             { id: "ACTIVE", label: "In Progress" },
             { id: "TEST_READY", label: "Test Ready" },
             { id: "MASTERED", label: "Mastered" },
@@ -297,7 +306,9 @@ export function SyllabusExplorer({ subjects }: { subjects: any[] }) {
               className={cn(
                 "px-3 py-1 rounded-full text-[11px] font-semibold border transition-colors whitespace-nowrap",
                 filterStatus === f.id
-                  ? "bg-blue-600/15 text-blue-600 dark:text-blue-400 border-blue-500/40 font-bold"
+                  ? f.id === "NEEDS_REVISION"
+                    ? "bg-amber-500/20 text-amber-700 dark:text-amber-400 border-amber-500/50 font-bold shadow-xs"
+                    : "bg-blue-600/15 text-blue-600 dark:text-blue-400 border-blue-500/40 font-bold shadow-xs"
                   : "bg-white dark:bg-zinc-900/40 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800/60 hover:bg-zinc-100"
               )}
             >
@@ -341,10 +352,17 @@ export function SyllabusExplorer({ subjects }: { subjects: any[] }) {
               };
             }
 
+            const isNeedsRevision = status === "NEEDS_REVISION";
+
             return (
               <div
                 key={chap.id}
-                className="p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950/80 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all shadow-sm space-y-3"
+                className={cn(
+                  "p-4 rounded-2xl border transition-all shadow-sm space-y-3",
+                  isNeedsRevision
+                    ? "border-amber-500/50 bg-amber-500/5 dark:bg-amber-950/15 hover:border-amber-500"
+                    : "border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950/80 hover:border-zinc-300 dark:hover:border-zinc-700"
+                )}
               >
                 {/* Main Chapter Summary Row */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -374,6 +392,14 @@ export function SyllabusExplorer({ subjects }: { subjects: any[] }) {
                           <span>{weightageBadge.label}</span>
                           <span className="font-mono opacity-80 font-normal">({weightageScore}%)</span>
                         </span>
+
+                        {/* Needs Revision Warning Badge */}
+                        {isNeedsRevision && (
+                          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold border bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/40 flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3 text-amber-500" />
+                            <span>Needs Revision (Forgotten)</span>
+                          </span>
+                        )}
                       </div>
 
                       <div className="flex items-center gap-3 text-[11px] text-zinc-500 dark:text-zinc-400 mt-1">
@@ -381,7 +407,7 @@ export function SyllabusExplorer({ subjects }: { subjects: any[] }) {
                         <span>•</span>
                         <span>{questionsSolved} / {chap.defaultQuestionTarget} Qs</span>
                         <span>•</span>
-                        <span>{chap.estimatedHours}h Est.</span>
+                        <span className="font-semibold text-zinc-700 dark:text-zinc-300">⏳ {chap.estimatedHours}h Mastery Time</span>
                       </div>
                     </div>
                   </div>
@@ -413,9 +439,15 @@ export function SyllabusExplorer({ subjects }: { subjects: any[] }) {
                     <select
                       value={status}
                       onChange={(e) => handleQuickStatusChange(chap, e.target.value)}
-                      className="text-[11px] font-semibold px-2 py-1 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 focus:outline-hidden cursor-pointer"
+                      className={cn(
+                        "text-[11px] font-semibold px-2 py-1 rounded-lg border focus:outline-hidden cursor-pointer",
+                        isNeedsRevision
+                          ? "bg-amber-500/10 border-amber-500/40 text-amber-700 dark:text-amber-300 font-bold"
+                          : "border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200"
+                      )}
                     >
                       <option value="NOT_STARTED">Not Started (0%)</option>
+                      <option value="NEEDS_REVISION">⚠️ Needs Revision (Forgotten - 40%)</option>
                       <option value="LEARNING">Learning (25%)</option>
                       <option value="PRACTISING">Practising (50%)</option>
                       <option value="DEVELOPING">Developing (70%)</option>
@@ -424,7 +456,12 @@ export function SyllabusExplorer({ subjects }: { subjects: any[] }) {
                     </select>
 
                     {/* Circular Progress Ring */}
-                    <ProgressCircle value={readiness} size={42} strokeWidth={4} color={colors.bar} />
+                    <ProgressCircle
+                      value={readiness}
+                      size={42}
+                      strokeWidth={4}
+                      color={isNeedsRevision ? "#f59e0b" : colors.bar}
+                    />
 
                     <Link
                       href={`/chapter/${chap.slug}`}
@@ -451,7 +488,7 @@ export function SyllabusExplorer({ subjects }: { subjects: any[] }) {
                           >
                             <span className="text-zinc-800 dark:text-zinc-200">{top.name}</span>
                             <span className="text-[10px] font-mono text-zinc-400 font-semibold">
-                              {status === "MASTERED" ? "Mastered" : "Core"}
+                              {status === "MASTERED" ? "Mastered" : isNeedsRevision ? "Needs Review" : "Core"}
                             </span>
                           </div>
                         ))}

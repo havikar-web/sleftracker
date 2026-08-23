@@ -12,7 +12,10 @@ export async function getRevisionsGrouped(userId: string = DEFAULT_USER_ID) {
     where: { userId },
     include: {
       chapter: {
-        include: { subject: true },
+        include: {
+          subject: true,
+          progress: { where: { userId } },
+        },
       },
     },
     orderBy: { scheduledDate: "asc" },
@@ -157,4 +160,60 @@ export async function createManualRevisionSchedule(data: {
 
   revalidatePath("/revision");
   return { success: true, rev };
+}
+
+export async function markChapterNeedsRevision(
+  chapterId: string,
+  userId: string = DEFAULT_USER_ID
+) {
+  let chapter = await prisma.chapter.findUnique({ where: { id: chapterId } });
+  if (!chapter) {
+    chapter = await prisma.chapter.findUnique({ where: { slug: chapterId } });
+  }
+  if (!chapter) return null;
+
+  // 1. Update ChapterProgress to NEEDS_REVISION (studied before but forgotten)
+  await prisma.chapterProgress.upsert({
+    where: { userId_chapterId: { userId, chapterId: chapter.id } },
+    update: {
+      status: "NEEDS_REVISION",
+      readinessScore: 40,
+      revisionScore: 20,
+    },
+    create: {
+      userId,
+      chapterId: chapter.id,
+      status: "NEEDS_REVISION",
+      readinessScore: 40,
+      theoryScore: 50,
+      practiceScore: 30,
+      pyqScore: 20,
+      accuracyScore: 50,
+      revisionScore: 20,
+    },
+  });
+
+  // 2. Queue into Revision schedule due today
+  const existingPending = await prisma.revision.findFirst({
+    where: { userId, chapterId: chapter.id, status: "PENDING" },
+  });
+
+  if (!existingPending) {
+    const count = await prisma.revision.count({ where: { userId, chapterId: chapter.id } });
+    await prisma.revision.create({
+      data: {
+        userId,
+        chapterId: chapter.id,
+        scheduledDate: new Date(),
+        revisionNumber: count + 1,
+        status: "PENDING",
+      },
+    });
+  }
+
+  revalidatePath("/revision");
+  revalidatePath("/syllabus");
+  revalidatePath(`/chapter/${chapter.slug}`);
+  revalidatePath("/");
+  return { success: true };
 }
