@@ -1,0 +1,379 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                  String               @id @default(cuid())
+  name                String               @default("JEE Aspirant")
+  email               String?              @unique
+  targetExam          String               @default("JEE Main + Advanced 2027")
+  targetDate          DateTime             @default("2027-05-01T00:00:00.000Z")
+  currentClass        String               @default("Class 11") // "11", "12", "Dropper"
+  dailyStudyHours     Float                @default(7.0)
+  dailyQuestionTarget Int                  @default(120)
+  weeklyQuestionTarget Int                 @default(700)
+  timezone            String               @default("Asia/Kolkata")
+  theme               String               @default("dark")
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  chapterProgress     ChapterProgress[]
+  topicProgress       TopicProgress[]
+  roadmaps            Roadmap[]
+  goals               Goal[]
+  tasks               Task[]
+  practiceSessions    PracticeSession[]
+  studySessions       StudySession[]
+  tests               Test[]
+  revisions           Revision[]
+  snapshots           ReadinessSnapshot[]
+}
+
+model Subject {
+  id           String            @id @default(cuid())
+  name         String            @unique // "Physics", "Chemistry", "Mathematics", "Biology"
+  shortName    String            // "PHY", "CHE", "MATH", "BIO"
+  category     String?           // For Chemistry: "Physical", "Inorganic", "Organic"
+  displayOrder Int
+  color        String            // Hex color code
+
+  chapters     Chapter[]
+  tasks        Task[]
+  practice     PracticeSession[]
+}
+
+model Chapter {
+  id                       String            @id @default(cuid())
+  subjectId                String
+  subject                  Subject           @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  classLevel               Int               // 11 or 12
+  name                     String
+  slug                     String            @unique
+  displayOrder             Int
+  officialSyllabusIncluded Boolean           @default(true)
+  historicalPriority       Float             @default(80.0) // 0-100 score
+  estimatedHours           Float             @default(15.0)
+  defaultQuestionTarget    Int               @default(100)
+  defaultPYQTarget         Int               @default(50)
+  description              String?
+  prerequisiteIds          String[]          // Array of Chapter slugs or IDs
+
+  topics                   Topic[]
+  progress                 ChapterProgress[]
+  roadmapChapters          RoadmapChapter[]
+  tasks                    Task[]
+  practiceSessions         PracticeSession[]
+  testChapters             TestChapter[]
+  revisions                Revision[]
+
+  @@index([subjectId])
+  @@index([classLevel])
+}
+
+model Topic {
+  id           String          @id @default(cuid())
+  chapterId    String
+  chapter      Chapter         @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  name         String
+  displayOrder Int
+
+  progress     TopicProgress[]
+  tasks        Task[]
+
+  @@index([chapterId])
+}
+
+model TopicProgress {
+  id        String   @id @default(cuid())
+  userId    String
+  topicId   String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic     Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  status    String   @default("NOT_STARTED") // NOT_STARTED, LEARNING, UNDERSTOOD, PRACTISED, STRONG
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, topicId])
+  @@index([userId])
+}
+
+model ChapterProgress {
+  id                 String    @id @default(cuid())
+  userId             String
+  chapterId          String
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chapter            Chapter   @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  theoryScore        Float     @default(0) // 0 - 100
+  practiceScore      Float     @default(0) // 0 - 100
+  pyqScore           Float     @default(0) // 0 - 100
+  accuracyScore      Float     @default(0) // 0 - 100
+  testScore          Float     @default(0) // 0 - 100
+  revisionScore      Float     @default(0) // 0 - 100
+  readinessScore     Float     @default(0) // Computed 0 - 100
+
+  status             String    @default("NOT_STARTED") // NOT_STARTED, LEARNING, PRACTISING, DEVELOPING, TEST_READY, MASTERED, NEEDS_REVISION
+  isManualOverride   Boolean   @default(false)
+
+  questionsSolved    Int       @default(0)
+  pyqsSolved         Int       @default(0)
+  correctIndependent Int       @default(0)
+  wrong              Int       @default(0)
+  assisted           Int       @default(0)
+  studyMinutes       Int       @default(0)
+
+  lastStudiedAt      DateTime?
+  lastRevisedAt      DateTime?
+  updatedAt          DateTime  @updatedAt
+
+  @@unique([userId, chapterId])
+  @@index([userId])
+  @@index([chapterId])
+}
+
+model Roadmap {
+  id         String         @id @default(cuid())
+  userId     String
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String         @default("Main JEE Roadmap")
+  startDate  DateTime       @default(now())
+  targetDate DateTime
+
+  phases     RoadmapPhase[]
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  @@index([userId])
+}
+
+model RoadmapPhase {
+  id          String           @id @default(cuid())
+  roadmapId   String
+  roadmap     Roadmap          @relation(fields: [roadmapId], references: [id], onDelete: Cascade)
+  name        String           // "Phase 1: High ROI", etc.
+  description String?
+  order       Int
+  startDate   DateTime
+  endDate     DateTime
+
+  chapters    RoadmapChapter[]
+
+  @@index([roadmapId])
+}
+
+model RoadmapChapter {
+  id                     String        @id @default(cuid())
+  phaseId                String
+  phase                  RoadmapPhase  @relation(fields: [phaseId], references: [id], onDelete: Cascade)
+  chapterId              String
+  chapter                Chapter       @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  order                  Int
+  suggestedTargetDate    DateTime?
+  userTargetDate         DateTime?
+  priorityOverride       String?       // "VERY_HIGH", "HIGH", "MEDIUM", "LOW"
+  estimatedHoursOverride Float?
+  questionTargetOverride Int?
+  pyqTargetOverride      Int?
+
+  tasks                  Task[]
+
+  @@index([phaseId])
+  @@index([chapterId])
+}
+
+model Goal {
+  id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  goalType    String       // "LONG_TERM", "MONTHLY", "WEEKLY", "DAILY", "CUSTOM"
+  startDate   DateTime
+  endDate     DateTime
+  priority    String       @default("HIGH") // "CRITICAL", "HIGH", "MEDIUM", "LOW"
+  status      String       @default("IN_PROGRESS") // "IN_PROGRESS", "COMPLETED", "ABANDONED"
+  createdAt   DateTime     @default(now())
+
+  metrics     GoalMetric[]
+  tasks       Task[]
+
+  @@index([userId])
+}
+
+model GoalMetric {
+  id           String   @id @default(cuid())
+  goalId       String
+  goal         Goal     @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  metricType   String   // "QUESTIONS", "PYQS", "STUDY_HOURS", "CHAPTER_READINESS", "TESTS", "ACCURACY"
+  subjectId    String?
+  chapterId    String?
+  targetValue  Float
+  currentValue Float    @default(0)
+
+  @@index([goalId])
+}
+
+model Task {
+  id               String          @id @default(cuid())
+  userId           String
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subjectId        String?
+  subject          Subject?        @relation(fields: [subjectId], references: [id])
+  chapterId        String?
+  chapter          Chapter?        @relation(fields: [chapterId], references: [id])
+  topicId          String?
+  topic            Topic?          @relation(fields: [topicId], references: [id])
+  goalId           String?
+  goal             Goal?           @relation(fields: [goalId], references: [id])
+  roadmapChapterId String?
+  roadmapChapter   RoadmapChapter? @relation(fields: [roadmapChapterId], references: [id])
+
+  title            String
+  taskType         String          // "THEORY", "QUESTIONS", "PYQS", "BOOK_PRACTICE", "REVISION", "TEST", "ERROR_REVIEW", "NOTES"
+  targetType       String          // "QUESTIONS", "MINUTES", "PAGES", "PERCENTAGE", "COMPLETION_STATE", "NONE"
+  targetValue      Float?
+  completedValue   Float           @default(0)
+  priority         String          @default("MEDIUM") // "CRITICAL", "HIGH", "MEDIUM", "LOW"
+  dueDate          DateTime        @default(now())
+  estimatedMinutes Int             @default(45)
+  status           String          @default("PENDING") // "PENDING", "IN_PROGRESS", "COMPLETED"
+  notes            String?
+  order            Int             @default(0)
+  createdAt        DateTime        @default(now())
+  completedAt      DateTime?
+
+  @@index([userId])
+  @@index([dueDate])
+}
+
+model PracticeSession {
+  id                 String    @id @default(cuid())
+  userId             String
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subjectId          String
+  subject            Subject   @relation(fields: [subjectId], references: [id])
+  chapterId          String
+  chapter            Chapter   @relation(fields: [chapterId], references: [id])
+  topicId            String?
+  source             String    // "JEE_MAIN_PYQ", "JEE_ADVANCED_PYQ", "HCV", "CENGAGE", "COACHING_MODULE", "NCERT", "OTHER"
+  sourceDetail       String?
+  yearRange          String?
+  questions          Int
+  correctIndependent Int
+  wrong              Int
+  assisted           Int
+  unattempted        Int       @default(0)
+  durationMinutes    Int       @default(30)
+  difficulty         String    @default("MEDIUM") // "EASY", "MEDIUM", "HARD", "MIXED"
+  date               DateTime  @default(now())
+  notes              String?
+
+  @@index([userId])
+  @@index([chapterId])
+  @@index([date])
+}
+
+model StudySession {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chapterId       String?
+  taskId          String?
+  durationMinutes Int
+  date            DateTime  @default(now())
+  notes           String?
+
+  @@index([userId])
+  @@index([date])
+}
+
+model Test {
+  id              String        @id @default(cuid())
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  testType        String        // "TOPIC", "CHAPTER", "MIXED", "PART_SYLLABUS", "JEE_MAIN_MOCK", "JEE_ADV_MOCK", "COLLEGE", "CUSTOM"
+  date            DateTime      @default(now())
+  durationMinutes Int           @default(60)
+  totalMarks      Float         @default(100)
+  score           Float
+  physicsScore    Float?
+  chemistryScore  Float?
+  mathScore       Float?
+  biologyScore    Float?
+  questions       Int           @default(25)
+  correct         Int           @default(20)
+  wrong           Int           @default(4)
+  unattempted     Int           @default(1)
+  percentile      Float?
+  rank            Int?
+  notes           String?
+
+  testChapters    TestChapter[]
+  errors          TestError[]
+
+  @@index([userId])
+  @@index([date])
+}
+
+model TestChapter {
+  id        String   @id @default(cuid())
+  testId    String
+  test      Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  chapterId String
+  chapter   Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@index([testId])
+  @@index([chapterId])
+}
+
+model TestError {
+  id        String   @id @default(cuid())
+  testId    String
+  test      Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  errorType String   // "CONCEPT_ERROR", "FORMULA_ERROR", "CALCULATION_ERROR", "MISREAD_QUESTION", "SILLY_MISTAKE", "TIME_PRESSURE", "GUESS", "FORGOT_FACT", "UNKNOWN_CONCEPT"
+  count     Int      @default(1)
+  notes     String?
+
+  @@index([testId])
+}
+
+model Revision {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chapterId       String
+  chapter         Chapter   @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  scheduledDate   DateTime
+  completedDate   DateTime?
+  revisionNumber  Int       @default(1) // 1, 2, 3, 4, 5
+  recallQuality   String?   // "POOR", "WEAK", "OKAY", "STRONG"
+  durationMinutes Int?
+  questionsSolved Int?
+  status          String    @default("PENDING") // "PENDING", "COMPLETED", "SKIPPED"
+
+  @@index([userId])
+  @@index([chapterId])
+  @@index([scheduledDate])
+}
+
+model ReadinessSnapshot {
+  id                 String   @id @default(cuid())
+  userId             String
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date               DateTime @default(now())
+  overallReadiness   Float
+  physicsReadiness   Float
+  chemistryReadiness Float
+  mathReadiness      Float
+  biologyReadiness   Float?
+  totalQuestions     Int
+  totalStudyHours    Float
+
+  @@index([userId])
+  @@index([date])
+}
