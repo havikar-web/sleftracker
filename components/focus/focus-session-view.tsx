@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import {
   Play,
@@ -36,6 +36,8 @@ interface QuestionLog {
   timestamp: number;
 }
 
+const FOCUS_STORAGE_KEY = "jee_focus_live_session_v2";
+
 export function FocusSessionView({
   allChapters = [],
   defaultChapterId,
@@ -58,6 +60,10 @@ export function FocusSessionView({
   const [isRunning, setIsRunning] = useState(false);
   const [seconds, setSeconds] = useState(0);
 
+  // Exact timestamp references for background-tab drift-proof accuracy
+  const startTimestampRef = useRef<number | null>(null);
+  const accumulatedSecondsRef = useRef<number>(0);
+
   // Live MCQ Question Tally
   const [questionLogs, setQuestionLogs] = useState<QuestionLog[]>([]);
   const [isSaving, setIsSaving] = useState(false);
@@ -67,6 +73,140 @@ export function FocusSessionView({
   const activeChapter = allChapters.find((c) => c.id === selectedChapterId) || allChapters[0];
   const activeSubtopics = activeChapter?.topics || [];
   const subjectColors = getSubjectColor(activeChapter?.subjectName || "Physics");
+
+  // Sync elapsed seconds mathematically from timestamp delta
+  const syncElapsed = useCallback(() => {
+    if (startTimestampRef.current && isRunning) {
+      const now = Date.now();
+      const elapsedSinceStart = Math.floor((now - startTimestampRef.current) / 1000);
+      const total = accumulatedSecondsRef.current + Math.max(0, elapsedSinceStart);
+      setSeconds(total);
+      return total;
+    }
+    return accumulatedSecondsRef.current;
+  }, [isRunning]);
+
+  // Restore live session from localStorage on initial mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(FOCUS_STORAGE_KEY);
+      if (saved && saved.trim() !== "" && saved !== "undefined" && saved !== "null") {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.isSessionActive) {
+          if (parsed.selectedChapterId) setSelectedChapterId(parsed.selectedChapterId);
+          if (parsed.selectedSubtopicIds) setSelectedSubtopicIds(parsed.selectedSubtopicIds);
+          if (parsed.studyMode) setStudyMode(parsed.studyMode);
+          if (parsed.source) setSource(parsed.source);
+          if (parsed.sessionNotes) setSessionNotes(parsed.sessionNotes);
+          if (parsed.questionLogs) setQuestionLogs(parsed.questionLogs);
+
+          setIsSessionActive(true);
+          accumulatedSecondsRef.current = parsed.accumulatedSeconds || 0;
+
+          if (parsed.isRunning && parsed.startTimestamp) {
+            startTimestampRef.current = parsed.startTimestamp;
+            const now = Date.now();
+            const elapsed = Math.floor((now - parsed.startTimestamp) / 1000);
+            const total = (parsed.accumulatedSeconds || 0) + Math.max(0, elapsed);
+            setSeconds(total);
+            setIsRunning(true);
+          } else {
+            startTimestampRef.current = null;
+            setSeconds(parsed.accumulatedSeconds || 0);
+            setIsRunning(false);
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Focus session parse error:", e);
+      try {
+        localStorage.removeItem(FOCUS_STORAGE_KEY);
+      } catch {}
+    }
+  }, []);
+
+  // Timer Tick + Background Tab Visibility & Focus Resync
+  useEffect(() => {
+    let interval: any = null;
+
+    if (isSessionActive && isRunning) {
+      interval = setInterval(() => {
+        syncElapsed();
+      }, 1000);
+    }
+
+    // Immediate sync when returning to tab or window focus
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        syncElapsed();
+      }
+    };
+
+    const handleFocus = () => {
+      syncElapsed();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      if (interval) clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [isSessionActive, isRunning, syncElapsed]);
+
+  // Tab Title Live Clock (e.g. ⏱️ 25:10 — Rotational Motion | JEE OS Focus)
+  useEffect(() => {
+    if (isSessionActive && isRunning) {
+      const hrs = Math.floor(seconds / 3600);
+      const mins = Math.floor((seconds % 3600) / 60);
+      const secs = seconds % 60;
+      const formatted = `${hrs > 0 ? `${hrs}:` : ""}${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+      document.title = `⏱️ ${formatted} — ${activeChapter?.name || "Focus"} | JEE OS`;
+    } else if (isSessionActive && !isRunning) {
+      document.title = `❚❚ Paused — ${activeChapter?.name || "Focus"} | JEE OS`;
+    } else {
+      document.title = "JEE OS — Serious Academic Operating System for JEE Aspirants";
+    }
+
+    return () => {
+      document.title = "JEE OS — Serious Academic Operating System for JEE Aspirants";
+    };
+  }, [isSessionActive, isRunning, seconds, activeChapter]);
+
+  // Persist live session state to localStorage
+  useEffect(() => {
+    if (isSessionActive) {
+      localStorage.setItem(
+        FOCUS_STORAGE_KEY,
+        JSON.stringify({
+          isSessionActive,
+          isRunning,
+          startTimestamp: startTimestampRef.current,
+          accumulatedSeconds: accumulatedSecondsRef.current,
+          selectedChapterId,
+          selectedSubtopicIds,
+          studyMode,
+          source,
+          sessionNotes,
+          questionLogs,
+        })
+      );
+    } else {
+      localStorage.removeItem(FOCUS_STORAGE_KEY);
+    }
+  }, [
+    isSessionActive,
+    isRunning,
+    selectedChapterId,
+    selectedSubtopicIds,
+    studyMode,
+    source,
+    sessionNotes,
+    questionLogs,
+    seconds,
+  ]);
 
   // Filtered Chapters based on search, subject, and weightage
   const filteredChapters = allChapters.filter((c) => {
@@ -94,26 +234,35 @@ export function FocusSessionView({
     );
   };
 
-  // Timer Tick
-  useEffect(() => {
-    let interval: any = null;
-    if (isSessionActive && isRunning) {
-      interval = setInterval(() => {
-        setSeconds((s) => s + 1);
-      }, 1000);
-    } else {
-      clearInterval(interval);
-    }
-    return () => clearInterval(interval);
-  }, [isSessionActive, isRunning]);
-
   // Start Session
   const handleStartSession = () => {
     if (!selectedChapterId) return;
+    const now = Date.now();
+    startTimestampRef.current = now;
+    accumulatedSecondsRef.current = 0;
     setSeconds(0);
     setQuestionLogs([]);
     setIsSessionActive(true);
     setIsRunning(true);
+  };
+
+  // Pause / Resume Toggle
+  const handleTogglePauseResume = () => {
+    if (isRunning) {
+      // Pausing
+      if (startTimestampRef.current) {
+        const now = Date.now();
+        const elapsedSinceStart = Math.floor((now - startTimestampRef.current) / 1000);
+        accumulatedSecondsRef.current += Math.max(0, elapsedSinceStart);
+        startTimestampRef.current = null;
+        setSeconds(accumulatedSecondsRef.current);
+      }
+      setIsRunning(false);
+    } else {
+      // Resuming
+      startTimestampRef.current = Date.now();
+      setIsRunning(true);
+    }
   };
 
   // Log Single MCQ click
@@ -151,10 +300,11 @@ export function FocusSessionView({
 
   // End Session & Save Everything
   const handleEndSession = async () => {
+    const finalSeconds = syncElapsed();
     setIsRunning(false);
     setIsSaving(true);
 
-    const durationMinutes = Math.max(1, Math.round(seconds / 60));
+    const durationMinutes = Math.max(1, Math.round(finalSeconds / 60));
     const subtopicsText =
       selectedSubtopicNames.length > 0 ? ` [Subtopics: ${selectedSubtopicNames.join(", ")}]` : "";
 
@@ -195,6 +345,11 @@ export function FocusSessionView({
         subjectName: activeChapter?.subjectName,
         subtopics: selectedSubtopicNames,
       });
+
+      // Clean up localStorage
+      localStorage.removeItem(FOCUS_STORAGE_KEY);
+      startTimestampRef.current = null;
+      accumulatedSecondsRef.current = 0;
     } catch (err) {
       console.error("Failed to save focus session:", err);
     } finally {
@@ -232,11 +387,11 @@ export function FocusSessionView({
                 What are you studying right now?
               </h1>
               <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-                Search any chapter and optionally tag subtopics. Live 1-tap MCQ tracking records every question as Independent, Assisted, or Wrong.
+                Search any chapter and optionally tag subtopics. Background-proof timer continues running accurately even when switching tabs.
               </p>
             </div>
 
-            {/* 1. Chapter Search & Quick Select (No annoying scrolling!) */}
+            {/* 1. Chapter Search & Quick Select */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
@@ -326,7 +481,7 @@ export function FocusSessionView({
                       key={chap.id}
                       onClick={() => {
                         setSelectedChapterId(chap.id);
-                        setSelectedSubtopicIds([]); // reset subtopics on chapter change
+                        setSelectedSubtopicIds([]);
                       }}
                       className={cn(
                         "p-2.5 rounded-xl border cursor-pointer transition-all flex items-center justify-between gap-2",
@@ -486,7 +641,7 @@ export function FocusSessionView({
             <div className="pt-3 border-t border-zinc-100 dark:border-zinc-850 flex items-center justify-end">
               <button
                 onClick={handleStartSession}
-                className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-md transition-all active:scale-95 flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Play className="w-4 h-4 fill-current" />
                 <span>Start Focus Study Session</span>
@@ -525,9 +680,9 @@ export function FocusSessionView({
 
             <div className="flex items-center gap-2 shrink-0">
               <button
-                onClick={() => setIsRunning(!isRunning)}
+                onClick={handleTogglePauseResume}
                 className={cn(
-                  "px-3.5 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1.5 transition-colors",
+                  "px-3.5 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1.5 transition-colors cursor-pointer",
                   isRunning
                     ? "bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-800"
                     : "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800"
@@ -540,7 +695,7 @@ export function FocusSessionView({
               <button
                 onClick={handleEndSession}
                 disabled={isSaving}
-                className="px-4 py-1.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white shadow-sm transition-all active:scale-95 flex items-center gap-1.5"
+                className="px-4 py-1.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white shadow-sm transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 <Square className="w-3.5 h-3.5 fill-current" />
                 <span>{isSaving ? "Saving..." : "Finish & Save"}</span>
@@ -559,7 +714,7 @@ export function FocusSessionView({
                 {timeDisplay}
               </div>
               <div className="text-xs text-zinc-500 mt-2 font-mono">
-                {isRunning ? "● Timer ticking" : "❚❚ Paused"}
+                {isRunning ? "● Running in background" : "❚❚ Paused"}
               </div>
             </div>
 
@@ -610,7 +765,7 @@ export function FocusSessionView({
               {questionLogs.length > 0 && (
                 <button
                   onClick={handleUndo}
-                  className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 font-semibold"
+                  className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 font-semibold cursor-pointer"
                   title="Undo last question"
                 >
                   <Undo2 className="w-3.5 h-3.5" /> Undo Last
@@ -750,7 +905,7 @@ export function FocusSessionView({
                 setIsSessionActive(false);
                 setSelectedSubtopicIds([]);
               }}
-              className="px-5 py-2.5 rounded-xl border border-zinc-300 dark:border-zinc-700 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              className="px-5 py-2.5 rounded-xl border border-zinc-300 dark:border-zinc-700 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer"
             >
               Start Another Session
             </button>
