@@ -341,3 +341,136 @@ export async function getAllChaptersForSyllabus(userId: string = DEFAULT_USER_ID
 
   return subjects;
 }
+
+export async function createCustomChapter(data: {
+  name: string;
+  subjectId: string;
+  classLevel: number;
+  estimatedHours?: number;
+  historicalPriority?: number;
+  defaultQuestionTarget?: number;
+  defaultPYQTarget?: number;
+  topics?: string[];
+  userId?: string;
+}) {
+  const userId = data.userId || DEFAULT_USER_ID;
+
+  if (!data.name || !data.name.trim()) {
+    throw new Error("Chapter name is required");
+  }
+
+  // Generate base slug
+  let slug = data.name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  if (!slug) slug = "custom-chapter-" + Date.now();
+
+  // Ensure unique slug
+  const existingSlug = await prisma.chapter.findUnique({ where: { slug } });
+  if (existingSlug) {
+    slug = `${slug}-${Math.floor(100 + Math.random() * 900)}`;
+  }
+
+  // Get max display order in subject
+  const maxOrderChap = await prisma.chapter.findFirst({
+    where: { subjectId: data.subjectId },
+    orderBy: { displayOrder: "desc" },
+    select: { displayOrder: true },
+  });
+  const displayOrder = (maxOrderChap?.displayOrder || 0) + 1;
+
+  const estimatedHours = data.estimatedHours || 12;
+  const historicalPriority = data.historicalPriority || 75;
+  const defaultQuestionTarget = data.defaultQuestionTarget || 100;
+  const defaultPYQTarget = data.defaultPYQTarget || 50;
+
+  // Create chapter
+  const chapter = await prisma.chapter.create({
+    data: {
+      name: data.name.trim(),
+      slug,
+      subjectId: data.subjectId,
+      classLevel: data.classLevel || 11,
+      displayOrder,
+      estimatedHours,
+      historicalPriority,
+      defaultQuestionTarget,
+      defaultPYQTarget,
+      prerequisiteIds: [],
+    },
+    include: {
+      subject: true,
+      topics: true,
+      progress: true,
+    },
+  });
+
+  // Create Subtopics if provided
+  if (data.topics && data.topics.length > 0) {
+    let tOrder = 1;
+    for (const tName of data.topics) {
+      const trimmed = tName.trim();
+      if (trimmed) {
+        await prisma.topic.create({
+          data: {
+            chapterId: chapter.id,
+            name: trimmed,
+            displayOrder: tOrder++,
+          },
+        });
+      }
+    }
+  }
+
+  // Initialize ChapterProgress
+  await prisma.chapterProgress.create({
+    data: {
+      userId,
+      chapterId: chapter.id,
+      theoryScore: 0,
+      practiceScore: 0,
+      pyqScore: 0,
+      accuracyScore: 0,
+      testScore: 0,
+      revisionScore: 0,
+      readinessScore: 0,
+      status: "NOT_STARTED",
+      questionsSolved: 0,
+      pyqsSolved: 0,
+      correctIndependent: 0,
+      wrong: 0,
+      assisted: 0,
+      studyMinutes: 0,
+    },
+  });
+
+  revalidatePath("/syllabus");
+  revalidatePath("/");
+  revalidatePath("/focus");
+  revalidatePath("/roadmap");
+  revalidatePath(`/chapter/${chapter.slug}`);
+
+  return chapter;
+}
+
+export async function deleteCustomChapter(chapterId: string) {
+  await prisma.chapterProgress.deleteMany({ where: { chapterId } });
+  await prisma.topicProgress.deleteMany({ where: { topic: { chapterId } } });
+  await prisma.topic.deleteMany({ where: { chapterId } });
+  await prisma.practiceSession.deleteMany({ where: { chapterId } });
+  await prisma.studySession.deleteMany({ where: { chapterId } });
+  await prisma.testChapter.deleteMany({ where: { chapterId } });
+  await prisma.task.deleteMany({ where: { chapterId } });
+  await prisma.revision.deleteMany({ where: { chapterId } });
+  await prisma.roadmapChapter.deleteMany({ where: { chapterId } });
+  await prisma.chapter.delete({ where: { id: chapterId } });
+
+  revalidatePath("/syllabus");
+  revalidatePath("/");
+  revalidatePath("/focus");
+  revalidatePath("/roadmap");
+  return { success: true };
+}

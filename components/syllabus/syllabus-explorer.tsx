@@ -15,15 +15,19 @@ import {
   SlidersHorizontal,
   ArrowUpDown,
   AlertTriangle,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import { cn, getSubjectColor, getStatusBadge, getPriorityLabel } from "@/lib/utils";
-import { updateChapterManualProgress } from "@/lib/actions/chapter-actions";
+import { updateChapterManualProgress, deleteCustomChapter } from "@/lib/actions/chapter-actions";
 import { logPracticeSession } from "@/lib/actions/practice-actions";
 import { setActiveWeeklyTargetChapter } from "@/lib/actions/task-actions";
 import { markChapterNeedsRevision } from "@/lib/actions/revision-actions";
 import { ProgressCircle } from "@/components/ui/progress-circle";
+import { AddChapterModal } from "@/components/modals/add-chapter-modal";
 
-export function SyllabusExplorer({ subjects }: { subjects: any[] }) {
+export function SyllabusExplorer({ subjects: initialSubjects }: { subjects: any[] }) {
+  const [subjects, setSubjects] = useState<any[]>(initialSubjects);
   const [selectedSubject, setSelectedSubject] = useState<string>("Physics");
   const [selectedClass, setSelectedClass] = useState<string>("ALL");
   const [filterStatus, setFilterStatus] = useState<string>("ALL");
@@ -32,6 +36,7 @@ export function SyllabusExplorer({ subjects }: { subjects: any[] }) {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [expandedChapters, setExpandedChapters] = useState<Record<string, boolean>>({});
   const [chapterStates, setChapterStates] = useState<Record<string, any>>({});
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const activeSubject =
     subjects.find((s) => s.name.toLowerCase() === selectedSubject.toLowerCase()) ||
@@ -99,6 +104,36 @@ export function SyllabusExplorer({ subjects }: { subjects: any[] }) {
       assisted: 0,
       durationMinutes: 20,
     });
+  };
+
+  // Delete chapter handler
+  const handleDeleteChapter = async (chapter: any) => {
+    if (!confirm(`Are you sure you want to delete chapter "${chapter.name}"?`)) return;
+
+    setSubjects((prev) =>
+      prev.map((sub) => {
+        if (sub.id !== chapter.subjectId) return sub;
+        return {
+          ...sub,
+          chapters: sub.chapters.filter((c: any) => c.id !== chapter.id),
+        };
+      })
+    );
+
+    await deleteCustomChapter(chapter.id);
+  };
+
+  // Handle new chapter created from modal
+  const handleChapterCreated = (newChapter: any) => {
+    setSubjects((prev) =>
+      prev.map((sub) => {
+        if (sub.id !== newChapter.subjectId) return sub;
+        return {
+          ...sub,
+          chapters: [...sub.chapters, newChapter],
+        };
+      })
+    );
   };
 
   // Filter & Sort chapters
@@ -175,15 +210,25 @@ export function SyllabusExplorer({ subjects }: { subjects: any[] }) {
           </p>
         </div>
 
-        {/* Circular Subject Ring */}
-        <div className="flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 rounded-xl shrink-0">
-          <ProgressCircle value={subjectReadinessPct} size={54} strokeWidth={5} color={colors.bar} />
-          <div>
-            <div className="text-[10px] text-zinc-500 dark:text-zinc-400 uppercase font-bold tracking-wider">
-              {activeSubject?.name} Ready
-            </div>
-            <div className="text-sm font-bold font-mono text-zinc-900 dark:text-zinc-100">
-              {subjectReadinessPct}% Mastered
+        <div className="flex items-center gap-3">
+          {/* Add Custom Chapter Button */}
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl transition-all shadow-sm active:scale-95 shrink-0"
+          >
+            <Plus className="w-4 h-4 stroke-[3]" /> Add Chapter
+          </button>
+
+          {/* Circular Subject Ring */}
+          <div className="flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2.5 rounded-xl shrink-0">
+            <ProgressCircle value={subjectReadinessPct} size={54} strokeWidth={5} color={colors.bar} />
+            <div>
+              <div className="text-[10px] text-zinc-500 dark:text-zinc-400 uppercase font-bold tracking-wider">
+                {activeSubject?.name} Ready
+              </div>
+              <div className="text-sm font-bold font-mono text-zinc-900 dark:text-zinc-100">
+                {subjectReadinessPct}% Mastered
+              </div>
             </div>
           </div>
         </div>
@@ -208,7 +253,7 @@ export function SyllabusExplorer({ subjects }: { subjects: any[] }) {
                   : "bg-white dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800/80 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200"
               )}
             >
-              {sub.name}
+              {sub.name} ({sub.chapters?.length || 0})
             </button>
           );
         })}
@@ -327,9 +372,9 @@ export function SyllabusExplorer({ subjects }: { subjects: any[] }) {
         ) : (
           filteredChapters.map((chap: any) => {
             const state = chapterStates[chap.id];
-            const readiness = state?.readinessScore ?? chap.progress[0]?.readinessScore ?? 0;
-            const status = state?.status ?? chap.progress[0]?.status ?? "NOT_STARTED";
-            const questionsSolved = state?.questionsSolved ?? chap.progress[0]?.questionsSolved ?? 0;
+            const readiness = state?.readinessScore ?? chap.progress?.[0]?.readinessScore ?? 0;
+            const status = state?.status ?? chap.progress?.[0]?.status ?? "NOT_STARTED";
+            const questionsSolved = state?.questionsSolved ?? chap.progress?.[0]?.questionsSolved ?? 0;
             const isExpanded = expandedChapters[chap.id];
             const weightageScore = Math.round(chap.historicalPriority || 75);
 
@@ -470,6 +515,15 @@ export function SyllabusExplorer({ subjects }: { subjects: any[] }) {
                     >
                       <ArrowRight className="w-4 h-4" />
                     </Link>
+
+                    {/* Delete Option */}
+                    <button
+                      onClick={() => handleDeleteChapter(chap)}
+                      className="p-1.5 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors"
+                      title="Delete Chapter"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </div>
 
@@ -503,6 +557,14 @@ export function SyllabusExplorer({ subjects }: { subjects: any[] }) {
           })
         )}
       </div>
+
+      {/* Add Chapter Modal */}
+      <AddChapterModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        subjects={subjects}
+        onChapterCreated={handleChapterCreated}
+      />
     </div>
   );
 }
