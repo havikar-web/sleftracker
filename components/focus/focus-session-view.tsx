@@ -24,6 +24,8 @@ import {
   Layers,
   X,
   SlidersHorizontal,
+  PlusCircle,
+  Plus,
 } from "lucide-react";
 import { cn, getSubjectColor } from "@/lib/utils";
 import { logStudySession } from "@/lib/actions/study-actions";
@@ -68,6 +70,12 @@ export function FocusSessionView({
   const [questionLogs, setQuestionLogs] = useState<QuestionLog[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [completedSummary, setCompletedSummary] = useState<any>(null);
+
+  // Batch MCQ Modal State
+  const [batchModalOpen, setBatchModalOpen] = useState(false);
+  const [batchIndep, setBatchIndep] = useState(8);
+  const [batchAssist, setBatchAssist] = useState(1);
+  const [batchWrong, setBatchWrong] = useState(1);
 
   // Selected chapter object & subtopics
   const activeChapter = allChapters.find((c) => c.id === selectedChapterId) || allChapters[0];
@@ -249,7 +257,6 @@ export function FocusSessionView({
   // Pause / Resume Toggle
   const handleTogglePauseResume = () => {
     if (isRunning) {
-      // Pausing
       if (startTimestampRef.current) {
         const now = Date.now();
         const elapsedSinceStart = Math.floor((now - startTimestampRef.current) / 1000);
@@ -259,7 +266,6 @@ export function FocusSessionView({
       }
       setIsRunning(false);
     } else {
-      // Resuming
       startTimestampRef.current = Date.now();
       setIsRunning(true);
     }
@@ -273,6 +279,26 @@ export function FocusSessionView({
       timestamp: Date.now(),
     };
     setQuestionLogs((prev) => [newLog, ...prev]);
+  };
+
+  // Batch Log MCQs (for students who solve 10 questions on paper first and mark together)
+  const handleBatchLogSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newLogs: QuestionLog[] = [];
+    const now = Date.now();
+
+    for (let i = 0; i < batchIndep; i++) {
+      newLogs.push({ id: Math.random().toString(36).substring(2, 9), type: "INDEPENDENT", timestamp: now });
+    }
+    for (let i = 0; i < batchAssist; i++) {
+      newLogs.push({ id: Math.random().toString(36).substring(2, 9), type: "ASSISTED", timestamp: now });
+    }
+    for (let i = 0; i < batchWrong; i++) {
+      newLogs.push({ id: Math.random().toString(36).substring(2, 9), type: "WRONG", timestamp: now });
+    }
+
+    setQuestionLogs((prev) => [...newLogs, ...prev]);
+    setBatchModalOpen(false);
   };
 
   // Undo Last Logged MCQ
@@ -289,6 +315,7 @@ export function FocusSessionView({
   const liveAccuracy =
     totalSolved > 0 ? Math.round((independentCount / totalSolved) * 100) : 0;
 
+  // True Session Average Pace: Total Session Minutes / Total Solved MCQs
   const minutesElapsed = seconds / 60;
   const avgPace =
     totalSolved > 0 ? (minutesElapsed / totalSolved).toFixed(1) : "0.0";
@@ -725,7 +752,7 @@ export function FocusSessionView({
                 <div className="text-3xl sm:text-4xl font-mono font-bold text-zinc-900 dark:text-zinc-100 mt-1">
                   {totalSolved} <span className="text-xs text-zinc-400 font-normal">MCQs</span>
                 </div>
-                <div className="text-[11px] text-zinc-500 font-mono mt-1">
+                <div className="text-[11px] text-zinc-500 font-mono mt-1" title="Computed as: Total Study Time ÷ Total Questions Solved. Accurate whether you tap one-by-one or solve on paper first and batch log.">
                   Avg Pace: <strong>{avgPace} min/Q</strong>
                 </div>
               </div>
@@ -751,26 +778,36 @@ export function FocusSessionView({
 
           {/* 3. LIVE 1-TAP MCQ CLICKER / LOGGER */}
           <div className="p-6 rounded-3xl border-2 border-blue-500/40 bg-white dark:bg-zinc-950 shadow-md space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h2 className="text-base font-bold text-zinc-900 dark:text-white flex items-center gap-2">
                   <Zap className="w-5 h-5 text-blue-600 dark:text-blue-400 fill-current" />
                   Live MCQ Clicker — Tap As You Solve
                 </h2>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                  Tap the button that matches how you solved each question:
+                  Tap one-by-one or use <strong>Batch Log</strong> if you solved 10 questions on paper first:
                 </p>
               </div>
 
-              {questionLogs.length > 0 && (
+              <div className="flex items-center gap-2">
+                {/* Batch Log Button */}
                 <button
-                  onClick={handleUndo}
-                  className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 font-semibold cursor-pointer"
-                  title="Undo last question"
+                  onClick={() => setBatchModalOpen(true)}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 border border-indigo-300 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95"
                 >
-                  <Undo2 className="w-3.5 h-3.5" /> Undo Last
+                  <PlusCircle className="w-3.5 h-3.5" /> Batch Log Paper MCQs
                 </button>
-              )}
+
+                {questionLogs.length > 0 && (
+                  <button
+                    onClick={handleUndo}
+                    className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 font-semibold cursor-pointer"
+                    title="Undo last question"
+                  >
+                    <Undo2 className="w-3.5 h-3.5" /> Undo Last
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* 3 Giant Touch/Click Buttons */}
@@ -847,7 +884,96 @@ export function FocusSessionView({
         </div>
       )}
 
-      {/* 3. SESSION COMPLETED DEBRIEF CARD */}
+      {/* 3. BATCH MCQ MODAL */}
+      {batchModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="w-full max-w-md rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-5 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-zinc-200 dark:border-zinc-800">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                  <PlusCircle className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Batch Log Solved MCQs</h3>
+                  <p className="text-[11px] text-zinc-500">Solved multiple questions on paper? Enter your counts together</p>
+                </div>
+              </div>
+              <button onClick={() => setBatchModalOpen(false)} className="text-zinc-400 hover:text-zinc-600">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleBatchLogSubmit} className="space-y-3 text-xs">
+              <div className="space-y-1">
+                <label className="font-semibold text-emerald-600 dark:text-emerald-400 flex justify-between">
+                  <span>Independent Correct (✓)</span>
+                  <span className="font-mono font-bold">{batchIndep} Qs</span>
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={batchIndep}
+                  onChange={(e) => setBatchIndep(Math.max(0, parseInt(e.target.value) || 0))}
+                  className="w-full p-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 font-mono font-bold"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-semibold text-amber-600 dark:text-amber-400 flex justify-between">
+                  <span>Assisted / Hint (💡)</span>
+                  <span className="font-mono font-bold">{batchAssist} Qs</span>
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={batchAssist}
+                  onChange={(e) => setBatchAssist(Math.max(0, parseInt(e.target.value) || 0))}
+                  className="w-full p-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 font-mono font-bold"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-semibold text-rose-600 dark:text-rose-400 flex justify-between">
+                  <span>Wrong / Mistakes (✗)</span>
+                  <span className="font-mono font-bold">{batchWrong} Qs</span>
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={batchWrong}
+                  onChange={(e) => setBatchWrong(Math.max(0, parseInt(e.target.value) || 0))}
+                  className="w-full p-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 font-mono font-bold"
+                />
+              </div>
+
+              <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-[11px] text-zinc-500">
+                Total to log: <strong>{batchIndep + batchAssist + batchWrong} MCQs</strong> • Average pace will calculate across your full {Math.round(seconds / 60)} mins study time.
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setBatchModalOpen(false)}
+                  className="px-3 py-1.5 text-zinc-500 hover:text-zinc-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold shadow-sm"
+                >
+                  Add {batchIndep + batchAssist + batchWrong} Solved MCQs
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 4. SESSION COMPLETED DEBRIEF CARD */}
       {completedSummary && (
         <div className="p-8 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-xl text-center space-y-6 animate-in zoom-in-95 duration-200">
           <div className="h-16 w-16 mx-auto rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 shadow-sm">

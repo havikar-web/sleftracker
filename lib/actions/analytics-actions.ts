@@ -176,17 +176,172 @@ export async function getAnalyticsOverview(userId: string = DEFAULT_USER_ID) {
     count: err._sum.count || 0,
   }));
 
-  // 6. Readiness snapshots for trend
-  const snapshots = await prisma.readinessSnapshot.findMany({
-    where: { userId },
-    orderBy: { date: "asc" },
-    take: 12,
+  // 9. Past 14-Days Daily Activity History (MCQs & Study Hours)
+  const fourteenDaysAgo = new Date();
+  fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 13);
+  fourteenDaysAgo.setHours(0, 0, 0, 0);
+
+  const [recentPracticeSessions, recentStudySessions] = await Promise.all([
+    prisma.practiceSession.findMany({
+      where: { userId, date: { gte: fourteenDaysAgo } },
+      orderBy: { date: "asc" },
+    }),
+    prisma.studySession.findMany({
+      where: { userId, date: { gte: fourteenDaysAgo } },
+      orderBy: { date: "asc" },
+    }),
+  ]);
+
+  const dailyActivityMap = new Map<string, {
+    dateStr: string;
+    dayName: string;
+    mcqsSolved: number;
+    independent: number;
+    assisted: number;
+    wrong: number;
+    studyMinutes: number;
+    studyHours: number;
+    accuracy: number;
+  }>();
+
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().split("T")[0];
+    const dateStr = d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+    const dayName = d.toLocaleDateString("en-IN", { weekday: "short" });
+    dailyActivityMap.set(key, {
+      dateStr,
+      dayName,
+      mcqsSolved: 0,
+      independent: 0,
+      assisted: 0,
+      wrong: 0,
+      studyMinutes: 0,
+      studyHours: 0,
+      accuracy: 0,
+    });
+  }
+
+  recentPracticeSessions.forEach((ps) => {
+    const key = ps.date.toISOString().split("T")[0];
+    const entry = dailyActivityMap.get(key);
+    if (entry) {
+      entry.mcqsSolved += ps.questions;
+      entry.independent += ps.correctIndependent;
+      entry.assisted += ps.assisted;
+      entry.wrong += ps.wrong;
+    }
   });
 
-  // 7. Tests taken count
-  const testsCount = await prisma.test.count({ where: { userId } });
+  recentStudySessions.forEach((ss) => {
+    const key = ss.date.toISOString().split("T")[0];
+    const entry = dailyActivityMap.get(key);
+    if (entry) {
+      entry.studyMinutes += ss.durationMinutes;
+      entry.studyHours = Math.round((entry.studyMinutes / 60) * 10) / 10;
+    }
+  });
 
-  // 8. Calculate Independent Accuracy %
+  const dailyActivityHistory = Array.from(dailyActivityMap.values()).map((item) => {
+    const totalAttempted = item.independent + item.assisted + item.wrong;
+    const accuracy = totalAttempted > 0 ? Math.round((item.independent / totalAttempted) * 100) : 0;
+    return {
+      ...item,
+      accuracy,
+    };
+  });
+
+  // 10. Expected vs Actual Syllabus Completion Trajectory (760 Total Hours Target)
+  const TOTAL_SYLLABUS_HOURS = 760;
+  const targetDate = new Date(user?.targetDate || "2027-01-01T00:00:00.000Z");
+  const now = new Date();
+  const msRemaining = targetDate.getTime() - now.getTime();
+  const daysRemaining = Math.max(1, Math.ceil(msRemaining / (1000 * 60 * 60 * 24)));
+
+  const totalLoggedHours = Math.round(((totalStudy._sum.durationMinutes || 0) / 60) * 10) / 10;
+  const remainingHours = Math.max(0, TOTAL_SYLLABUS_HOURS - totalLoggedHours);
+  const requiredDailyPace = Math.round((remainingHours / daysRemaining) * 10) / 10;
+
+  // Compute 7-day rolling daily study average
+  const last7DaysStudyMinutes = recentStudySessions
+    .filter((s) => s.date.getTime() >= Date.now() - 7 * 24 * 60 * 60 * 1000)
+    .reduce((acc, s) => acc + s.durationMinutes, 0);
+  const actualCurrentDailyRate = Math.max(
+    0.5,
+    Math.round((last7DaysStudyMinutes / 7 / 60) * 10) / 10
+  );
+
+  // Generate milestone curve points: 4 historical milestones + Today + 6 future projection milestones
+  const trajectoryPoints: any[] = [];
+
+  // Historical / Past Milestones
+  for (let i = 4; i >= 1; i--) {
+    const pastDate = new Date();
+    pastDate.setDate(pastDate.getDate() - i * 5);
+    const dateLabel = pastDate.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+    const histHours = Math.max(0, Math.round((totalLoggedHours - (i * actualCurrentDailyRate * 5)) * 10) / 10);
+    const expectedHistHours = Math.max(0, Math.round((TOTAL_SYLLABUS_HOURS * (1 - (daysRemaining + i * 5) / 140)) * 10) / 10);
+
+    trajectoryPoints.push({
+      label: dateLabel,
+      actualHours: histHours,
+      actualPct: Math.round((histHours / TOTAL_SYLLABUS_HOURS) * 100),
+      expectedHours: expectedHistHours,
+      expectedPct: Math.round((expectedHistHours / TOTAL_SYLLABUS_HOURS) * 100),
+      projectedHours: null,
+      projectedPct: null,
+    });
+  }
+
+  // Today point
+  const todayLabel = "Today";
+  const expectedTodayHours = Math.max(
+    0,
+    Math.round((TOTAL_SYLLABUS_HOURS * (1 - daysRemaining / 140)) * 10) / 10
+  );
+  trajectoryPoints.push({
+    label: todayLabel,
+    actualHours: totalLoggedHours,
+    actualPct: Math.round((totalLoggedHours / TOTAL_SYLLABUS_HOURS) * 100),
+    expectedHours: expectedTodayHours,
+    expectedPct: Math.round((expectedTodayHours / TOTAL_SYLLABUS_HOURS) * 100),
+    projectedHours: totalLoggedHours,
+    projectedPct: Math.round((totalLoggedHours / TOTAL_SYLLABUS_HOURS) * 100),
+  });
+
+  // Future Projection Milestones (15d, 30d, 60d, 90d, 120d, Jan 1st 2027)
+  const futureIntervals = [
+    { days: 15, label: "+15 Days" },
+    { days: 30, label: "+30 Days" },
+    { days: 60, label: "+60 Days" },
+    { days: 90, label: "+90 Days" },
+    { days: 120, label: "+120 Days" },
+    { days: daysRemaining, label: "Jan 1st 2027" },
+  ];
+
+  futureIntervals.forEach((fut) => {
+    const futExpectedHours = Math.min(
+      TOTAL_SYLLABUS_HOURS,
+      Math.round((expectedTodayHours + (TOTAL_SYLLABUS_HOURS - expectedTodayHours) * (fut.days / daysRemaining)) * 10) / 10
+    );
+    const futProjectedHours = Math.min(
+      TOTAL_SYLLABUS_HOURS,
+      Math.round((totalLoggedHours + actualCurrentDailyRate * fut.days) * 10) / 10
+    );
+
+    trajectoryPoints.push({
+      label: fut.label,
+      actualHours: null,
+      actualPct: null,
+      expectedHours: futExpectedHours,
+      expectedPct: Math.round((futExpectedHours / TOTAL_SYLLABUS_HOURS) * 100),
+      projectedHours: futProjectedHours,
+      projectedPct: Math.round((futProjectedHours / TOTAL_SYLLABUS_HOURS) * 100),
+    });
+  });
+
+  // 11. Calculate Overall Independent Accuracy %
   const totalAttempted =
     (totalPractice._sum.correctIndependent || 0) +
     (totalPractice._sum.wrong || 0) +
@@ -198,6 +353,19 @@ export async function getAnalyticsOverview(userId: string = DEFAULT_USER_ID) {
           ((totalPractice._sum.correctIndependent || 0) / totalAttempted) * 100
         )
       : 0;
+
+  const snapshots = await prisma.readinessSnapshot.findMany({
+    where: { userId },
+    orderBy: { date: "asc" },
+    take: 12,
+  });
+
+  const testsCount = await prisma.test.count({ where: { userId } });
+
+  const daysToFinishAtCurrentRate = Math.ceil(remainingHours / actualCurrentDailyRate);
+  const projectedCompletionDate = new Date();
+  projectedCompletionDate.setDate(projectedCompletionDate.getDate() + daysToFinishAtCurrentRate);
+  const isAheadOfSchedule = projectedCompletionDate.getTime() <= targetDate.getTime();
 
   return {
     user,
@@ -213,7 +381,7 @@ export async function getAnalyticsOverview(userId: string = DEFAULT_USER_ID) {
     weekStudyHours: Math.round(((weekStudy._sum.durationMinutes || 0) / 60) * 10) / 10,
     monthQuestions: monthPractice._sum.questions || 0,
     totalQuestions: totalPractice._sum.questions || 0,
-    totalStudyHours: Math.round(((totalStudy._sum.durationMinutes || 0) / 60) * 10) / 10,
+    totalStudyHours: totalLoggedHours,
     independentAccuracy: averageIndependentAccuracy,
     assistedQuestions: totalPractice._sum.assisted || 0,
     wrongQuestions: totalPractice._sum.wrong || 0,
@@ -223,5 +391,21 @@ export async function getAnalyticsOverview(userId: string = DEFAULT_USER_ID) {
     lowestRevisionStrength,
     errorData,
     snapshots,
+    dailyActivityHistory,
+    trajectoryPoints,
+    pacingInfo: {
+      totalSyllabusHours: TOTAL_SYLLABUS_HOURS,
+      totalLoggedHours,
+      remainingHours,
+      daysRemaining,
+      requiredDailyPace,
+      actualCurrentDailyRate,
+      projectedCompletionDate: projectedCompletionDate.toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }),
+      isAheadOfSchedule,
+    },
   };
 }
