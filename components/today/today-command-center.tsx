@@ -38,6 +38,7 @@ import {
   deleteTask,
 } from "@/lib/actions/task-actions";
 import { logPracticeSession } from "@/lib/actions/practice-actions";
+import { getDateActivityDetails } from "@/lib/actions/analytics-actions";
 import { useTimer } from "@/components/timer-context";
 import { QuickPracticeModal } from "@/components/modals/quick-practice-modal";
 import { AddTaskModal } from "@/components/modals/add-task-modal";
@@ -74,6 +75,47 @@ export function TodayCommandCenter({
   const [modalSubjectFilter, setModalSubjectFilter] = useState<string>("ALL");
   const [modalWeightageFilter, setModalWeightageFilter] = useState<string>("ALL");
   const [isSettingTarget, setIsSettingTarget] = useState(false);
+
+  // Date Navigator & Daily Reset State
+  const todayISO = new Date().toISOString().split("T")[0];
+  const [selectedDateStr, setSelectedDateStr] = useState<string>(todayISO);
+  const [selectedDateActivity, setSelectedDateActivity] = useState<any>(null);
+  const [isLoadingDateActivity, setIsLoadingDateActivity] = useState(false);
+
+  const isSelectedDateToday = selectedDateStr === todayISO;
+
+  const handleSelectDate = async (newDateStr: string) => {
+    setSelectedDateStr(newDateStr);
+    if (newDateStr === todayISO) {
+      setSelectedDateActivity(null);
+      return;
+    }
+    setIsLoadingDateActivity(true);
+    try {
+      const data = await getDateActivityDetails(newDateStr);
+      setSelectedDateActivity(data);
+    } catch (err) {
+      console.error("Failed to load date activity:", err);
+    } finally {
+      setIsLoadingDateActivity(false);
+    }
+  };
+
+  const handlePrevDay = () => {
+    const d = new Date(selectedDateStr);
+    d.setDate(d.getDate() - 1);
+    handleSelectDate(d.toISOString().split("T")[0]);
+  };
+
+  const handleNextDay = () => {
+    const d = new Date(selectedDateStr);
+    d.setDate(d.getDate() + 1);
+    handleSelectDate(d.toISOString().split("T")[0]);
+  };
+
+  const handleResetToToday = () => {
+    handleSelectDate(todayISO);
+  };
 
   // Dynamic Days until Jan 1, 2027
   const targetDate = user?.targetDate || "2027-01-01";
@@ -248,6 +290,196 @@ export function TodayCommandCenter({
 
   return (
     <div className="space-y-5">
+      {/* 0. DATE NAVIGATOR & DAILY RESET TOOLBAR */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-900/60 shadow-xs">
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-0.5 shadow-xs">
+            <button
+              onClick={handlePrevDay}
+              className="px-2.5 py-1 text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white rounded-lg transition-colors cursor-pointer"
+              title="Previous Day"
+            >
+              ◀ Prev Day
+            </button>
+
+            <div className="flex items-center gap-1.5 px-3 py-1 font-bold text-xs text-zinc-900 dark:text-zinc-100 border-x border-zinc-200 dark:border-zinc-800">
+              <Calendar className="w-3.5 h-3.5 text-blue-500" />
+              <span>
+                {isSelectedDateToday ? "Today, " : ""}
+                {new Date(selectedDateStr + "T00:00:00").toLocaleDateString("en-IN", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                })}
+              </span>
+            </div>
+
+            <button
+              onClick={handleNextDay}
+              className="px-2.5 py-1 text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white rounded-lg transition-colors cursor-pointer"
+              title="Next Day"
+            >
+              Next Day ▶
+            </button>
+          </div>
+
+          <input
+            type="date"
+            value={selectedDateStr}
+            onChange={(e) => e.target.value && handleSelectDate(e.target.value)}
+            className="px-2.5 py-1 text-xs rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-zinc-700 dark:text-zinc-300 font-mono shadow-xs"
+          />
+
+          {!isSelectedDateToday && (
+            <button
+              onClick={handleResetToToday}
+              className="px-3 py-1 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1 cursor-pointer"
+            >
+              <RotateCcw className="w-3 h-3" /> Jump to Today (Live)
+            </button>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2 text-[11px] text-zinc-500 dark:text-zinc-400">
+          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+          <span>Daily Reset: MCQs and study hours reset fresh at 00:00 midnight.</span>
+        </div>
+      </div>
+
+      {/* PAST DATE ACTIVITY INSPECTOR (Visible when navigating back to any past date) */}
+      {!isSelectedDateToday && (
+        <div className="p-5 rounded-2xl border-2 border-indigo-500/40 bg-white dark:bg-zinc-950 shadow-md space-y-4 animate-in fade-in duration-200">
+          <div className="flex items-center justify-between pb-2 border-b border-zinc-200 dark:border-zinc-800">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                <Calendar className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+                  <span>Activity & Items Done on</span>
+                  <span className="text-indigo-600 dark:text-indigo-400 font-mono">
+                    {new Date(selectedDateStr + "T00:00:00").toLocaleDateString("en-IN", {
+                      weekday: "short",
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </span>
+                </h3>
+                <p className="text-[11px] text-zinc-500">Historical snapshot of MCQs solved, study sessions, and completed tasks</p>
+              </div>
+            </div>
+
+            <button
+              onClick={handleResetToToday}
+              className="text-xs text-blue-600 hover:underline font-semibold"
+            >
+              Back to Today
+            </button>
+          </div>
+
+          {isLoadingDateActivity ? (
+            <div className="py-8 text-center text-xs text-zinc-400 font-mono animate-pulse">
+              Loading activity records for this date...
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {/* Date Summary Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+                <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800">
+                  <div className="text-zinc-400 text-[10px] font-bold uppercase">MCQs Solved</div>
+                  <div className="text-xl font-bold font-mono text-blue-600 dark:text-blue-400 mt-0.5">
+                    {selectedDateActivity?.totalQuestions || 0} Qs
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800">
+                  <div className="text-zinc-400 text-[10px] font-bold uppercase">Study Time</div>
+                  <div className="text-xl font-bold font-mono text-indigo-600 dark:text-indigo-400 mt-0.5">
+                    {selectedDateActivity?.totalStudyHours || 0} Hours
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800">
+                  <div className="text-zinc-400 text-[10px] font-bold uppercase">Independent (✓)</div>
+                  <div className="text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-0.5">
+                    {selectedDateActivity?.independentCount || 0} / {selectedDateActivity?.totalQuestions || 0}
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800">
+                  <div className="text-zinc-400 text-[10px] font-bold uppercase">Accuracy Rate</div>
+                  <div className="text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-0.5">
+                    {selectedDateActivity?.accuracy || 0}%
+                  </div>
+                </div>
+              </div>
+
+              {/* Sessions List */}
+              <div className="space-y-2">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
+                  Logged Sessions & Tasks ({((selectedDateActivity?.studySessions?.length || 0) + (selectedDateActivity?.practiceSessions?.length || 0) + (selectedDateActivity?.completedTasks?.length || 0))} items)
+                </div>
+
+                {(!selectedDateActivity?.studySessions?.length && !selectedDateActivity?.practiceSessions?.length && !selectedDateActivity?.completedTasks?.length) ? (
+                  <div className="p-6 rounded-xl bg-zinc-50 dark:bg-zinc-900/30 border border-zinc-200 dark:border-zinc-800 text-center text-xs text-zinc-400">
+                    No sessions or tasks recorded on this specific date.
+                  </div>
+                ) : (
+                  <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                    {selectedDateActivity?.studySessions?.map((s: any) => (
+                      <div key={s.id} className="p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2">
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400">
+                            Study Focus
+                          </span>
+                          <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+                            {s.chapter?.name || "General Study"}
+                          </span>
+                          {s.notes && <span className="text-zinc-400 text-[11px]">({s.notes})</span>}
+                        </div>
+                        <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">{s.durationMinutes} mins</span>
+                      </div>
+                    ))}
+
+                    {selectedDateActivity?.practiceSessions?.map((p: any) => (
+                      <div key={p.id} className="p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2">
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400">
+                            MCQ Practice
+                          </span>
+                          <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+                            {p.chapter?.name || "Practice Session"}
+                          </span>
+                          <span className="text-[11px] text-zinc-400">
+                            ({p.correctIndependent} Indep, {p.assisted} Assist, {p.wrong} Wrong)
+                          </span>
+                        </div>
+                        <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">{p.questions} MCQs</span>
+                      </div>
+                    ))}
+
+                    {selectedDateActivity?.completedTasks?.map((t: any) => (
+                      <div key={t.id} className="p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2">
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400">
+                            Task Done
+                          </span>
+                          <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+                            {t.title}
+                          </span>
+                        </div>
+                        <span className="font-mono text-zinc-400 text-[11px]">Completed</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* 1. Header Command Ribbon with Circular Progress & Exact Jan 1 Countdown */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950/80 shadow-sm">
         <div>

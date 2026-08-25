@@ -409,3 +409,80 @@ export async function getAnalyticsOverview(userId: string = DEFAULT_USER_ID) {
     },
   };
 }
+
+export async function getDateActivityDetails(
+  dateStr: string, // "YYYY-MM-DD"
+  userId: string = DEFAULT_USER_ID
+) {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const startOfDay = new Date(year, month - 1, day, 0, 0, 0, 0);
+  const endOfDay = new Date(year, month - 1, day, 23, 59, 59, 999);
+
+  const [studySessions, practiceSessions, completedTasks, chapters] = await Promise.all([
+    prisma.studySession.findMany({
+      where: {
+        userId,
+        date: { gte: startOfDay, lte: endOfDay },
+      },
+      orderBy: { date: "desc" },
+    }),
+    prisma.practiceSession.findMany({
+      where: {
+        userId,
+        date: { gte: startOfDay, lte: endOfDay },
+      },
+      include: {
+        chapter: { include: { subject: true } },
+      },
+      orderBy: { date: "desc" },
+    }),
+    prisma.task.findMany({
+      where: {
+        userId,
+        status: "COMPLETED",
+        OR: [
+          { completedAt: { gte: startOfDay, lte: endOfDay } },
+          { dueDate: { gte: startOfDay, lte: endOfDay } },
+        ],
+      },
+      include: {
+        chapter: { include: { subject: true } },
+      },
+    }),
+    prisma.chapter.findMany({
+      include: { subject: true },
+    }),
+  ]);
+
+  const chapterMap = new Map(chapters.map((c) => [c.id, c]));
+
+  const enrichedStudySessions = studySessions.map((s) => ({
+    ...s,
+    chapter: s.chapterId ? chapterMap.get(s.chapterId) : null,
+  }));
+
+  const totalStudyMinutes = studySessions.reduce((acc, s) => acc + s.durationMinutes, 0);
+  const totalQuestions = practiceSessions.reduce((acc, p) => acc + p.questions, 0);
+  const independentCount = practiceSessions.reduce((acc, p) => acc + p.correctIndependent, 0);
+  const assistedCount = practiceSessions.reduce((acc, p) => acc + p.assisted, 0);
+  const wrongCount = practiceSessions.reduce((acc, p) => acc + p.wrong, 0);
+  const accuracy = totalQuestions > 0 ? Math.round((independentCount / totalQuestions) * 100) : 0;
+
+  const todayStr = new Date().toISOString().split("T")[0];
+  const isToday = dateStr === todayStr;
+
+  return {
+    dateStr,
+    isToday,
+    totalStudyMinutes,
+    totalStudyHours: Math.round((totalStudyMinutes / 60) * 10) / 10,
+    totalQuestions,
+    independentCount,
+    assistedCount,
+    wrongCount,
+    accuracy,
+    studySessions: enrichedStudySessions,
+    practiceSessions,
+    completedTasks,
+  };
+}
