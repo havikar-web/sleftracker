@@ -42,6 +42,7 @@ import { getDateActivityDetails } from "@/lib/actions/analytics-actions";
 import { useTimer } from "@/components/timer-context";
 import { QuickPracticeModal } from "@/components/modals/quick-practice-modal";
 import { AddTaskModal } from "@/components/modals/add-task-modal";
+import { NaturalLanguageLoggerModal } from "@/components/quick-log/natural-language-logger-modal";
 import { ProgressCircle } from "@/components/ui/progress-circle";
 
 export function TodayCommandCenter({
@@ -66,6 +67,7 @@ export function TodayCommandCenter({
   const [practiceModalOpen, setPracticeModalOpen] = useState(false);
   const [selectedTaskForPractice, setSelectedTaskForPractice] = useState<any>(null);
   const [taskModalOpen, setTaskModalOpen] = useState(false);
+  const [nlpModalOpen, setNlpModalOpen] = useState(false);
   const [targetPickerOpen, setTargetPickerOpen] = useState(false);
   const [inlineTaskTitle, setInlineTaskTitle] = useState("");
   const [isQuickLogging, setIsQuickLogging] = useState<Record<string, boolean>>({});
@@ -618,6 +620,34 @@ export function TodayCommandCenter({
             })}
           </div>
         )}
+      </div>
+
+      {/* 2.5 AI NATURAL LANGUAGE QUICK-LOG BANNER */}
+      <div className="p-4 rounded-2xl border-2 border-dashed border-blue-500/40 bg-gradient-to-r from-blue-900/10 via-indigo-950/20 to-purple-900/10 dark:border-blue-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-2xl bg-blue-600/20 text-blue-500 border border-blue-500/30 shrink-0">
+            <Sparkles className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+              <span>Describe What You Did (Auto-Update JEE OS)</span>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold border border-blue-500/20">
+                AI NLP Logger
+              </span>
+            </h3>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+              Type or paste plain text (e.g. <em>&quot;Rotational Motion 2h, solved 25 pyqs from HCV (20 right, 5 wrong)&quot;</em>) — automatically updates study time, MCQs, and readiness!
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setNlpModalOpen(true)}
+          className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>Describe &amp; Auto-Update</span>
+        </button>
       </div>
 
       {/* 2. Today's Targets with Circular Progress Rings */}
@@ -1183,6 +1213,12 @@ export function TodayCommandCenter({
         isOpen={taskModalOpen}
         onClose={() => setTaskModalOpen(false)}
         chapters={allChapters}
+      />
+
+      <NaturalLanguageLoggerModal
+        isOpen={nlpModalOpen}
+        onClose={() => setNlpModalOpen(false)}
+        allChapters={allChapters}
       />
     </div>
   );
