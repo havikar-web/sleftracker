@@ -22,11 +22,13 @@ export function Header({
   onOpenSearch,
   onOpenQuickAction,
   onOpenQuickPractice,
+  onOpenDescribe,
   targetDate = "2027-01-01",
 }: {
   onOpenSearch?: () => void;
   onOpenQuickAction?: () => void;
   onOpenQuickPractice?: () => void;
+  onOpenDescribe?: () => void;
   targetDate?: string | Date;
 }) {
   const { isRunning, isPaused, seconds, activeSession, startTimer, pauseTimer, resumeTimer, stopTimer } = useTimer();
@@ -109,14 +111,26 @@ export function Header({
             className="hidden md:flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 rounded-md transition-colors shadow-xs"
           >
             <Play className="w-3 h-3 text-emerald-600 dark:text-emerald-400 fill-current" />
-            <span>Study & MCQ Timer</span>
+            <span>Study &amp; MCQ Timer</span>
           </Link>
+        )}
+
+        {/* AI Quick Describe Button */}
+        {onOpenDescribe && (
+          <button
+            onClick={onOpenDescribe}
+            className="flex items-center gap-1.5 px-3 py-1 text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/60 border border-blue-300 dark:border-blue-800/80 rounded-md transition-all shadow-xs active:scale-95 cursor-pointer"
+            title="Describe what you studied in natural language to auto-update JEE OS"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>⚡ Describe</span>
+          </button>
         )}
 
         {/* Quick Practice Button */}
         <button
           onClick={onOpenQuickPractice}
-          className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-800/60 rounded-md transition-colors shadow-sm active:scale-95"
+          className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-800/60 rounded-md transition-colors shadow-sm active:scale-95 cursor-pointer"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>+ Practice</span>

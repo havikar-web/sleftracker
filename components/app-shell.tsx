@@ -7,6 +7,7 @@ import { Header } from "@/components/navigation/header";
 import { QuickPracticeModal } from "@/components/modals/quick-practice-modal";
 import { AddTaskModal } from "@/components/modals/add-task-modal";
 import { GlobalSearchModal } from "@/components/modals/global-search-modal";
+import { NaturalLanguageLoggerModal } from "@/components/quick-log/natural-language-logger-modal";
 import { QuickActionFab } from "@/components/modals/quick-action-fab";
 import { useRouter } from "next/navigation";
 
@@ -20,6 +21,7 @@ export function AppShell({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isPracticeOpen, setIsPracticeOpen] = useState(false);
   const [isTaskOpen, setIsTaskOpen] = useState(false);
+  const [isDescribeOpen, setIsDescribeOpen] = useState(false);
   const router = useRouter();
 
   return (
@@ -32,6 +34,7 @@ export function AppShell({
         <Header
           onOpenSearch={() => setIsSearchOpen(true)}
           onOpenQuickPractice={() => setIsPracticeOpen(true)}
+          onOpenDescribe={() => setIsDescribeOpen(true)}
         />
 
         <main className="flex-1 p-3 sm:p-5 md:p-6 max-w-7xl w-full mx-auto">
@@ -52,6 +55,12 @@ export function AppShell({
       />
 
       {/* Global Modals */}
+      <NaturalLanguageLoggerModal
+        isOpen={isDescribeOpen}
+        onClose={() => setIsDescribeOpen(false)}
+        allChapters={chapters}
+      />
+
       <QuickPracticeModal
         isOpen={isPracticeOpen}
         onClose={() => setIsPracticeOpen(false)}
