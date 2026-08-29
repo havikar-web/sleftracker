@@ -13,6 +13,7 @@ import {
   Flame,
   Clock,
   Sparkles,
+  X,
 } from "lucide-react";
 import { useTimer } from "@/components/timer-context";
 import { useTheme } from "next-themes";
@@ -31,7 +32,7 @@ export function Header({
   onOpenDescribe?: () => void;
   targetDate?: string | Date;
 }) {
-  const { isRunning, isPaused, seconds, activeSession, startTimer, pauseTimer, resumeTimer, stopTimer } = useTimer();
+  const { isRunning, isPaused, seconds, activeSession, startTimer, pauseTimer, resumeTimer, stopTimer, resetTimer } = useTimer();
   const { theme, setTheme } = useTheme();
   const [isFinishing, setIsFinishing] = useState(false);
 
@@ -47,6 +48,15 @@ export function Header({
     setIsFinishing(true);
     await stopTimer();
     setIsFinishing(false);
+  };
+
+  const handleDiscard = () => {
+    if (seconds > 30) {
+      if (!window.confirm("⚠️ End timer without saving?\n\nThis study time will NOT be added to your daily progress.")) {
+        return;
+      }
+    }
+    resetTimer();
   };
 
   return (
@@ -81,7 +91,7 @@ export function Header({
               {isPaused ? (
                 <button
                   onClick={resumeTimer}
-                  className="p-1 hover:bg-blue-200 dark:hover:bg-blue-900/60 rounded text-blue-800 dark:text-blue-200"
+                  className="p-1 hover:bg-blue-200 dark:hover:bg-blue-900/60 rounded text-blue-800 dark:text-blue-200 cursor-pointer"
                   title="Resume"
                 >
                   <Play className="w-3 h-3 fill-current" />
@@ -89,17 +99,28 @@ export function Header({
               ) : (
                 <button
                   onClick={pauseTimer}
-                  className="p-1 hover:bg-blue-200 dark:hover:bg-blue-900/60 rounded text-blue-800 dark:text-blue-200"
+                  className="p-1 hover:bg-blue-200 dark:hover:bg-blue-900/60 rounded text-blue-800 dark:text-blue-200 cursor-pointer"
                   title="Pause"
                 >
                   <Pause className="w-3 h-3 fill-current" />
                 </button>
               )}
+
+              {/* Discard without saving */}
+              <button
+                onClick={handleDiscard}
+                className="p-1 hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:text-rose-500 rounded text-zinc-400 cursor-pointer"
+                title="End without saving to progress (Discard)"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+
+              {/* Save and add to progress */}
               <button
                 onClick={handleStop}
                 disabled={isFinishing}
-                className="p-1 hover:bg-rose-100 dark:hover:bg-rose-950 hover:text-rose-600 dark:hover:text-rose-300 rounded text-zinc-500"
-                title="Finish & Save"
+                className="p-1 hover:bg-rose-100 dark:hover:bg-rose-950 hover:text-rose-600 dark:hover:text-rose-300 rounded text-zinc-500 cursor-pointer"
+                title="Finish & Save (+ Progress)"
               >
                 <Square className="w-3 h-3 fill-current" />
               </button>

@@ -24,76 +24,407 @@ export interface ChapterCatalogItem {
   aliases?: string[];
 }
 
-// Canonical Aliases for all JEE chapters for fuzzy and synonym matching
-const CHAPTER_ALIASES: Record<string, string[]> = {
-  // Physics
-  "units-and-measurements": ["units and measurements", "units & measurements", "units", "dimensions", "dimensional analysis", "error analysis", "errors"],
-  "kinematics": ["kinematics", "motion in a straight line", "motion in 1d", "motion in 2d", "projectile motion", "relative motion", "1d motion", "2d motion"],
-  "laws-of-motion": ["laws of motion", "newton laws of motion", "nlm", "friction", "circular motion", "pseudo force"],
-  "work-energy-and-power": ["work energy and power", "work power and energy", "wep", "work energy power", "work and energy", "potential energy", "power"],
-  "rotational-motion": ["rotational motion", "rotation", "moment of inertia", "moi", "torque", "angular momentum", "rolling motion", "rolling", "center of mass", "com"],
-  "gravitation": ["gravitation", "gravity", "gravitational potential", "orbital velocity", "escape velocity", "kepler laws"],
-  "mechanical-properties-of-solids": ["mechanical properties of solids", "solids", "elasticity", "stress strain", "youngs modulus", "bulk modulus"],
-  "mechanical-properties-of-fluids": ["mechanical properties of fluids", "fluids", "fluid mechanics", "viscosity", "surface tension", "bernoulli", "pascal law", "buoyancy"],
-  "thermal-properties-of-matter": ["thermal properties of matter", "calorimetry", "thermal expansion", "heat transfer", "conduction", "convection", "radiation", "stefan law"],
-  "thermodynamics": ["thermodynamics", "thermo", "first law of thermo", "second law of thermo", "heat engine", "carnot engine", "carnot cycle", "entropy"],
-  "kinetic-theory-of-gases": ["kinetic theory of gases", "kinetic theory", "ktg", "ideal gas equation", "rms speed", "mean free path"],
-  "oscillations": ["oscillations", "simple harmonic motion", "shm", "spring pendulum", "simple pendulum"],
-  "waves": ["waves", "sound waves", "wave motion", "doppler effect", "standing waves", "beats", "organ pipes"],
-  "electrostatics": ["electrostatics", "electro", "coulomb law", "electric field", "electric potential", "gauss law", "capacitance", "capacitors", "capacitor"],
-  "current-electricity": ["current electricity", "current", "circuits", "kirchhoff laws", "meter bridge", "potentiometer", "drift velocity", "wheatstone bridge"],
-  "magnetic-effect-of-current-and-magnetism": ["magnetic effect of current", "magnetism", "biot savart", "ampere law", "lorentz force", "magnetic field", "dipole", "moving charges"],
-  "electromagnetic-induction-and-ac": ["electromagnetic induction and ac", "electromagnetic induction", "emi", "alternating current", "ac", "faraday law", "lenz law", "lcr circuits", "lcr", "transformer"],
-  "electromagnetic-waves": ["electromagnetic waves", "em waves", "emw", "displacement current", "electromagnetic spectrum"],
-  "optics": ["optics", "ray optics", "wave optics", "geometric optics", "reflection", "refraction", "lenses", "prisms", "interference", "diffraction", "ydse", "polarisation"],
-  "dual-nature-of-matter-and-radiation": ["dual nature of matter and radiation", "dual nature", "photoelectric effect", "photoelectric", "de broglie", "matter waves"],
-  "atoms-and-nuclei": ["atoms and nuclei", "atoms", "nuclei", "bohr model", "rutherford model", "radioactivity", "nuclear fission", "nuclear fusion", "mass defect"],
-  "electronic-devices": ["electronic devices", "semiconductors", "semiconductor", "pn junction", "diodes", "transistors", "logic gates", "led", "zener diode"],
+// Comprehensive keyword & topic mapping to canonical chapter slugs
+const TOPIC_KEYWORD_MAP: { slug: string; keywords: string[] }[] = [
+  // PHYSICS
+  {
+    slug: "rotational-motion",
+    keywords: [
+      "rotational motion", "rotation", "moment of inertia", "moi", "torque", "angular momentum",
+      "rolling motion", "rolling", "center of mass", "com", "rigid body", "parallel axis", "perpendicular axis"
+    ]
+  },
+  {
+    slug: "kinematics",
+    keywords: [
+      "kinematics", "motion in a straight line", "motion in 1d", "motion in 2d", "1d motion", "2d motion",
+      "projectile motion", "projectile", "relative motion", "relative velocity", "speed velocity", "acceleration"
+    ]
+  },
+  {
+    slug: "laws-of-motion",
+    keywords: [
+      "laws of motion", "newton laws", "nlm", "friction", "circular motion", "pseudo force",
+      "tension", "pulley", "free body diagram", "fbd", "banking of road", "momentum conservation"
+    ]
+  },
+  {
+    slug: "work-energy-power",
+    keywords: [
+      "work energy power", "work energy and power", "work power and energy", "wep", "work and energy",
+      "potential energy", "kinetic energy", "work energy theorem", "conservative force", "power", "collisions", "elastic collision"
+    ]
+  },
+  {
+    slug: "gravitation",
+    keywords: [
+      "gravitation", "gravity", "gravitational potential", "orbital velocity", "escape velocity",
+      "kepler laws", "kepler", "gravitational field", "satellite motion"
+    ]
+  },
+  {
+    slug: "electrostatics",
+    keywords: [
+      "electrostatics", "electro", "coulomb law", "electric field", "electric potential",
+      "gauss law", "flux", "capacitance", "capacitors", "capacitor", "dielectric", "electric dipole"
+    ]
+  },
+  {
+    slug: "current-electricity",
+    keywords: [
+      "current electricity", "current", "circuits", "kirchhoff laws", "kvl", "kcl",
+      "meter bridge", "potentiometer", "drift velocity", "wheatstone bridge", "resistance", "resistivity", "ohms law"
+    ]
+  },
+  {
+    slug: "magnetic-effects-and-magnetism",
+    keywords: [
+      "magnetic effect of current", "magnetic effects", "magnetism", "biot savart", "ampere law",
+      "lorentz force", "magnetic field", "dipole", "moving charges", "cyclotron", "magnetic materials", "galvanometer"
+    ]
+  },
+  {
+    slug: "emi-and-ac",
+    keywords: [
+      "electromagnetic induction", "emi", "alternating current", "ac", "faraday law",
+      "lenz law", "lcr circuits", "lcr", "transformer", "inductance", "inductor", "resonance ac", "rms voltage"
+    ]
+  },
+  {
+    slug: "ray-optics",
+    keywords: [
+      "ray optics", "geometric optics", "reflection", "refraction", "snell law",
+      "lenses", "lens formula", "mirrors", "prisms", "dispersion", "optical instruments", "microscope", "telescope"
+    ]
+  },
+  {
+    slug: "wave-optics",
+    keywords: [
+      "wave optics", "interference", "diffraction", "ydse", "young double slit",
+      "polarisation", "polarization", "huygens principle", "fringe width", "coherent sources"
+    ]
+  },
+  {
+    slug: "thermodynamics-physics",
+    keywords: [
+      "thermodynamics", "thermo", "first law of thermo", "second law of thermo", "heat engine",
+      "carnot engine", "carnot cycle", "carnot", "entropy", "isothermal", "adiabatic", "isobaric", "isochoric"
+    ]
+  },
+  {
+    slug: "kinetic-theory-of-gases",
+    keywords: [
+      "kinetic theory of gases", "kinetic theory", "ktg", "ideal gas equation", "rms speed",
+      "degrees of freedom", "mean free path", "maxwell distribution"
+    ]
+  },
+  {
+    slug: "oscillations-shm",
+    keywords: [
+      "oscillations", "simple harmonic motion", "shm", "spring pendulum", "simple pendulum",
+      "damped oscillation", "forced oscillation", "time period shm"
+    ]
+  },
+  {
+    slug: "waves-and-sound",
+    keywords: [
+      "mechanical waves", "sound waves", "wave motion", "doppler effect", "standing waves",
+      "beats", "organ pipes", "resonance tube", "speed of sound", "intensity of sound"
+    ]
+  },
+  {
+    slug: "atoms-and-nuclei",
+    keywords: [
+      "atoms and nuclei", "atoms", "nuclei", "bohr model", "rutherford model",
+      "radioactivity", "nuclear fission", "nuclear fusion", "mass defect", "binding energy", "half life physics", "alpha decay"
+    ]
+  },
+  {
+    slug: "dual-nature-radiation-matter",
+    keywords: [
+      "dual nature", "dual nature of radiation", "photoelectric effect", "photoelectric",
+      "stopping potential", "work function", "de broglie", "matter waves", "davisson germer"
+    ]
+  },
+  {
+    slug: "semiconductor-electronics",
+    keywords: [
+      "semiconductors", "semiconductor", "electronic devices", "pn junction", "diodes",
+      "zener diode", "transistors", "logic gates", "led", "photodiode", "solar cell"
+    ]
+  },
+  {
+    slug: "units-dimensions-measurement",
+    keywords: [
+      "units and dimensions", "units dimensions", "dimensional analysis", "vernier caliper",
+      "screw gauge", "error analysis", "significant figures", "measurements"
+    ]
+  },
+  {
+    slug: "electromagnetic-waves",
+    keywords: [
+      "electromagnetic waves", "em waves", "emw", "displacement current", "maxwell equations", "poynting vector"
+    ]
+  },
+  {
+    slug: "properties-of-solids-and-fluids",
+    keywords: [
+      "properties of solids", "properties of fluids", "fluids", "fluid mechanics", "elasticity",
+      "youngs modulus", "viscosity", "surface tension", "bernoulli", "pascal law", "buoyancy", "poiseuille"
+    ]
+  },
 
-  // Chemistry
-  "some-basic-concepts-of-chemistry": ["some basic concepts of chemistry", "basic concepts of chemistry", "mole concept", "mole", "stoichiometry", "empirical formula"],
-  "structure-of-atom": ["structure of atom", "atomic structure", "quantum numbers", "bohr model chem", "heisenberg", "electronic configuration"],
-  "classification-of-elements-and-periodicity": ["classification of elements", "periodic table", "periodicity", "periodic properties", "ionization energy", "electron gain enthalpy"],
-  "chemical-bonding-and-molecular-structure": ["chemical bonding", "chemical bonding and molecular structure", "molecular structure", "vsepr", "hybridization", "hybridisation", "mot", "molecular orbital theory", "dipole moment"],
-  "chemical-thermodynamics": ["chemical thermodynamics", "chem thermo", "enthalpy", "gibbs free energy", "hess law", "spontaneity", "thermochemistry"],
-  "equilibrium": ["equilibrium", "chemical equilibrium", "ionic equilibrium", "ph calculation", "buffer solutions", "solubility product", "ksp", "le chatelier"],
-  "redox-reactions": ["redox reactions", "redox", "oxidation state", "balancing redox", "oxidation number"],
-  "p-block-elements": ["p-block elements", "p block", "group 13", "group 14", "group 15", "group 16", "group 17", "group 18"],
-  "organic-chemistry-some-basic-principles-and-techniques": ["general organic chemistry", "goc", "organic chemistry basic principles", "iupac", "iupac nomenclature", "isomerism", "inductive effect", "resonance effect", "hyperconjugation"],
-  "hydrocarbons": ["hydrocarbons", "alkanes", "alkenes", "alkynes", "aromatic hydrocarbons", "benzene", "ozonolysis", "markovnikov"],
-  "solutions": ["solutions", "colligative properties", "raoult law", "van t hoff factor", "osmotic pressure", "elevation in boiling point", "depression in freezing point"],
-  "electrochemistry": ["electrochemistry", "nernst equation", "galvanic cell", "kohlrausch law", "faraday laws of electrolysis", "electrochemical cell"],
-  "chemical-kinetics": ["chemical kinetics", "kinetics", "rate of reaction", "order of reaction", "arrhenius equation", "half life", "activation energy"],
-  "d-and-f-block-elements": ["d and f block elements", "d and f block", "d-block", "f-block", "transition elements", "lanthanides", "actinides"],
-  "coordination-compounds": ["coordination compounds", "coordination", "complex compounds", "cft", "crystal field theory", "vbt", "ligands", "isomers coordination", "iupac coordination"],
-  "haloalkanes-and-haloarenes": ["haloalkanes and haloarenes", "haloalkanes", "haloarenes", "alkyl halides", "sn1", "sn2", "elimination reactions"],
-  "alcohols-phenols-and-ethers": ["alcohols phenols and ethers", "alcohols", "phenols", "ethers", "grignard reagent reactions", "reimer tiemann", "kolbe reaction"],
-  "aldehydes-ketones-and-carboxylic-acids": ["aldehydes ketones and carboxylic acids", "aldehydes", "ketones", "carboxylic acids", "carbonyl compounds", "aldol condensation", "cannizzaro", "clemmensen"],
-  "amines": ["amines", "diazonium salts", "hoffmann bromamide", "gabriel phthalimide", "carbylamine"],
-  "biomolecules": ["biomolecules", "carbohydrates", "amino acids", "proteins", "nucleic acids", "dna rna", "vitamins"],
+  // MATHEMATICS
+  {
+    slug: "integral-calculus",
+    keywords: [
+      "integral calculus", "integration", "integrals", "integral", "indefinite integration",
+      "definite integration", "definite integrals", "properties of definite integrals", "by parts",
+      "substitution method", "area under curve", "area under curves", "auc", "leibnitz rule"
+    ]
+  },
+  {
+    slug: "differential-calculus",
+    keywords: [
+      "differential calculus", "limits", "continuity", "differentiability", "lcd", "lhopital",
+      "differentiation", "derivatives", "aod", "application of derivatives", "maxima and minima",
+      "tangents and normals", "monotonicity", "increasing decreasing", "rolle theorem", "lmvt"
+    ]
+  },
+  {
+    slug: "straight-lines-and-circles",
+    keywords: [
+      "straight lines", "straight line", "circles", "circle", "coordinate geometry",
+      "slope", "distance formula", "pair of straight lines", "tangent to circle", "chord of contact", "family of circles"
+    ]
+  },
+  {
+    slug: "conic-sections",
+    keywords: [
+      "conic sections", "conics", "parabola", "ellipse", "hyperbola",
+      "eccentricity", "tangents to conics", "normals to conics", "latus rectum", "asymptotes"
+    ]
+  },
+  {
+    slug: "matrices-and-determinants",
+    keywords: [
+      "matrices and determinants", "matrices", "determinants", "matrix", "determinant",
+      "cramer rule", "adjoint matrix", "inverse of matrix", "system of linear equations", "eigenvalues"
+    ]
+  },
+  {
+    slug: "vector-algebra",
+    keywords: [
+      "vector algebra", "vectors", "vector", "dot product", "cross product",
+      "scalar triple product", "stp", "vector triple product", "vtp", "projection of vector"
+    ]
+  },
+  {
+    slug: "three-dimensional-geometry",
+    keywords: [
+      "three dimensional geometry", "3d geometry", "3d", "planes", "lines in 3d",
+      "direction cosines", "direction ratios", "shortest distance between lines", "coplanarity"
+    ]
+  },
+  {
+    slug: "complex-numbers-and-quadratics",
+    keywords: [
+      "complex numbers", "complex number", "quadratic equations", "quadratics",
+      "roots of equations", "modulus amplitude", "argand plane", "de moivre", "cube roots of unity", "discriminant"
+    ]
+  },
+  {
+    slug: "permutations-and-combinations",
+    keywords: [
+      "permutations and combinations", "pnc", "p&c", "p and c", "combinations",
+      "permutations", "arrangements", "selection", "derangements", "circular permutation"
+    ]
+  },
+  {
+    slug: "binomial-theorem",
+    keywords: [
+      "binomial theorem", "binomial", "binomial coefficients", "general term binomial",
+      "middle term", "multinomial theorem"
+    ]
+  },
+  {
+    slug: "sequences-and-series",
+    keywords: [
+      "sequences and series", "sequence and series", "ap", "gp", "hp", "agp",
+      "arithmetic progression", "geometric progression", "sum of n terms", "infinite gp", "telescopic series"
+    ]
+  },
+  {
+    slug: "trigonometry-and-itf",
+    keywords: [
+      "trigonometry", "trigo", "inverse trigonometric functions", "itf", "trig equations",
+      "compound angles", "multiple angles", "heights and distances", "sine rule", "cosine rule"
+    ]
+  },
+  {
+    slug: "probability-and-statistics",
+    keywords: [
+      "probability", "statistics", "bayes theorem", "conditional probability", "probability distribution",
+      "mean median mode", "variance", "standard deviation", "independent events", "bernoulli trials"
+    ]
+  },
+  {
+    slug: "differential-equations",
+    keywords: [
+      "differential equations", "differential equation", "de", "variable separable",
+      "homogeneous differential equation", "linear differential equation", "integrating factor", "order and degree"
+    ]
+  },
+  {
+    slug: "sets-relations-functions",
+    keywords: [
+      "sets relations and functions", "sets", "relations", "functions", "domain range",
+      "one-one onto", "composite functions", "inverse functions", "equivalence relation"
+    ]
+  },
+  {
+    slug: "mathematical-reasoning",
+    keywords: [
+      "mathematical reasoning", "logic", "tautology", "fallacy", "contrapositive", "converse", "truth table"
+    ]
+  },
 
-  // Mathematics
-  "sets-relations-and-functions": ["sets relations and functions", "sets", "relations", "functions", "domain range", "composite functions", "inverse functions"],
-  "trigonometric-functions": ["trigonometric functions", "trigonometry", "trigo", "trigonometric equations", "trig identities", "inverse trigo", "itf"],
-  "complex-numbers-and-quadratic-equations": ["complex numbers and quadratic equations", "complex numbers", "complex number", "quadratic equations", "quadratics", "roots of equations", "modulus amplitude", "de moivre"],
-  "permutations-and-combinations": ["permutations and combinations", "pnc", "p and c", "combinations", "permutations", "arrangements"],
-  "binomial-theorem": ["binomial theorem", "binomial", "binomial expansion", "general term binomial"],
-  "sequences-and-series": ["sequences and series", "sequence and series", "ap", "gp", "arithmetic progression", "geometric progression", "agp", "harmonic progression", "sum of series"],
-  "straight-lines": ["straight lines", "straight line", "coordinate geometry", "slope", "pair of straight lines", "distance formula", "locus"],
-  "conic-sections": ["conic sections", "conics", "circles", "circle", "parabola", "ellipse", "hyperbola", "tangents normals"],
-  "limits-continuity-and-differentiability": ["limits continuity and differentiability", "limits", "continuity", "differentiability", "lcd", "lhopital", "indeterminate forms"],
-  "differentiation": ["differentiation", "derivatives", "chain rule", "parametric differentiation", "implicit differentiation"],
-  "applications-of-derivatives": ["applications of derivatives", "application of derivatives", "aod", "tangents and normals", "monotonicity", "maxima and minima", "mean value theorem", "lmvt", "rolle theorem"],
-  "integrals": ["integrals", "integration", "indefinite integration", "definite integration", "definite integrals", "properties of definite integrals", "by parts"],
-  "applications-of-integrals": ["applications of integrals", "application of integrals", "area under curves", "area under the curve", "auc"],
-  "differential-equations": ["differential equations", "differential equation", "de", "variable separable", "homogeneous de", "linear differential equation", "integrating factor"],
-  "vector-algebra": ["vector algebra", "vectors", "vector", "dot product", "cross product", "scalar triple product", "vector triple product"],
-  "three-dimensional-geometry": ["three dimensional geometry", "3d geometry", "3d", "planes", "lines in 3d", "direction cosines", "direction ratios", "shortest distance"],
-  "matrices-and-determinants": ["matrices and determinants", "matrices", "determinants", "matrix", "cramer rule", "adjoint matrix", "system of linear equations"],
-  "probability": ["probability", "prob", "bayes theorem", "conditional probability", "probability distribution", "binomial distribution"],
-  "statistics": ["statistics", "mean median mode", "variance", "standard deviation"],
-  "mathematical-reasoning": ["mathematical reasoning", "logic", "tautology", "contrapositive"],
-};
+  // CHEMISTRY
+  {
+    slug: "general-organic-chemistry",
+    keywords: [
+      "general organic chemistry", "goc", "organic chemistry", "iupac", "iupac nomenclature",
+      "isomerism", "structural isomerism", "geometrical isomerism", "optical isomerism", "chirality",
+      "inductive effect", "resonance effect", "mesomeric effect", "hyperconjugation", "electrophile", "nucleophile", "carbocation"
+    ]
+  },
+  {
+    slug: "chemical-bonding-molecular-structure",
+    keywords: [
+      "chemical bonding", "chemical bonding and molecular structure", "molecular structure", "vsepr",
+      "hybridization", "hybridisation", "mot", "molecular orbital theory", "dipole moment", "hydrogen bonding", "fajans rule", "lattice energy"
+    ]
+  },
+  {
+    slug: "equilibrium-chemical-ionic",
+    keywords: [
+      "equilibrium", "chemical equilibrium", "ionic equilibrium", "ph calculation", "ph",
+      "buffer solutions", "buffer", "solubility product", "ksp", "le chatelier", "hydrolysis of salts", "ostwald dilution"
+    ]
+  },
+  {
+    slug: "chemical-thermodynamics",
+    keywords: [
+      "chemical thermodynamics", "chem thermo", "enthalpy", "entropy chem", "gibbs free energy",
+      "hess law", "spontaneity", "thermochemistry", "bond enthalpy"
+    ]
+  },
+  {
+    slug: "redox-and-electrochemistry",
+    keywords: [
+      "electrochemistry", "redox reactions", "redox", "nernst equation", "galvanic cell",
+      "kohlrausch law", "faraday laws of electrolysis", "standard electrode potential", "electrochemical cell", "conductance"
+    ]
+  },
+  {
+    slug: "hydrocarbons",
+    keywords: [
+      "hydrocarbons", "alkanes", "alkenes", "alkynes", "aromatic hydrocarbons", "benzene",
+      "ozonolysis", "markovnikov", "wurtz reaction", "friedel crafts", "electrophilic aromatic substitution"
+    ]
+  },
+  {
+    slug: "haloalkanes-and-haloarenes",
+    keywords: [
+      "haloalkanes and haloarenes", "haloalkanes", "haloarenes", "alkyl halides",
+      "sn1", "sn2", "e1", "e2", "elimination reaction", "grignard reagent preparation", "wurtz fittig"
+    ]
+  },
+  {
+    slug: "coordination-compounds",
+    keywords: [
+      "coordination compounds", "coordination chemistry", "coordination", "complex compounds",
+      "crystal field theory", "cft", "valence bond theory chem", "vbt", "ligands", "isomerism in coordination", "iupac coordination", "chelation"
+    ]
+  },
+  {
+    slug: "chemical-kinetics",
+    keywords: [
+      "chemical kinetics", "kinetics", "rate of reaction", "order of reaction",
+      "first order reaction", "arrhenius equation", "half life chem", "activation energy", "collision theory"
+    ]
+  },
+  {
+    slug: "aldehydes-ketones-carboxylic-acids",
+    keywords: [
+      "aldehydes ketones and carboxylic acids", "aldehydes", "ketones", "carboxylic acids", "carbonyl compounds",
+      "aldol condensation", "cannizzaro", "clemmensen reduction", "wolff kishner", "tollens test", "fehling test", "hell volhard zelinsky"
+    ]
+  },
+  {
+    slug: "alcohols-phenols-ethers",
+    keywords: [
+      "alcohols phenols and ethers", "alcohols", "phenols", "ethers", "reimer tiemann",
+      "kolbe reaction", "williamson ether synthesis", "lucas test", "esterification"
+    ]
+  },
+  {
+    slug: "amines-diazonium-salts",
+    keywords: [
+      "amines", "diazonium salts", "hoffmann bromamide", "gabriel phthalimide",
+      "carbylamine test", "hinsberg test", "sandmeyer reaction"
+    ]
+  },
+  {
+    slug: "mole-concept-stoichiometry",
+    keywords: [
+      "mole concept", "stoichiometry", "some basic concepts of chemistry", "molarity", "molality",
+      "normality", "limiting reagent", "empirical formula"
+    ]
+  },
+  {
+    slug: "atomic-structure",
+    keywords: [
+      "atomic structure", "structure of atom", "quantum numbers", "bohr model chem",
+      "heisenberg uncertainty", "de broglie chem", "photoelectric chem", "hunds rule", "pauli exclusion", "aufbau"
+    ]
+  },
+  {
+    slug: "periodic-table-periodicity",
+    keywords: [
+      "periodic table", "periodicity", "classification of elements", "ionization enthalpy",
+      "electron gain enthalpy", "electronegativity", "atomic radii", "screening effect"
+    ]
+  },
+  {
+    slug: "p-block-elements",
+    keywords: [
+      "p block elements", "p block", "group 13", "group 14", "group 15", "group 16", "group 17", "group 18",
+      "boron family", "carbon family", "nitrogen family", "oxygen family", "halogens", "noble gases"
+    ]
+  },
+  {
+    slug: "d-and-f-block-elements",
+    keywords: [
+      "d and f block elements", "d and f block", "d block", "f block", "transition elements",
+      "lanthanides", "actinides", "potassium permanganate", "potassium dichromate"
+    ]
+  },
+  {
+    slug: "solutions-chemistry",
+    keywords: [
+      "solutions", "colligative properties", "raoult law", "van t hoff factor",
+      "osmotic pressure", "elevation in boiling point", "depression in freezing point", "henry law"
+    ]
+  },
+  {
+    slug: "biomolecules",
+    keywords: [
+      "biomolecules", "carbohydrates", "glucose", "fructose", "amino acids",
+      "proteins", "peptide bond", "nucleic acids", "dna rna", "vitamins"
+    ]
+  }
+];
 
 export function parseNaturalLanguageInput(
   rawText: string,
@@ -130,44 +461,72 @@ function parseSingleSegment(
   text: string,
   allChapters: ChapterCatalogItem[]
 ): ParsedActivity | null {
-  const lower = text.toLowerCase();
+  const lower = text.toLowerCase().replace(/['".,\/#!$%\^&\*;:{}=\-_`~()]/g, " ");
 
-  // 1. Chapter Detection
-  let matchedChapter: ChapterCatalogItem | null = null;
-  let bestMatchScore = 0;
+  // 1. Chapter Detection (Scoring Algorithm across DB chapters + Keyword Index)
+  let bestChapter: ChapterCatalogItem | null = null;
+  let bestScore = 0;
 
-  for (const chapter of allChapters) {
-    const aliases = CHAPTER_ALIASES[chapter.slug] || [];
-    const searchTerms = [chapter.name.toLowerCase(), ...aliases];
+  // Build lookup map by slug
+  const chapterBySlug = new Map<string, ChapterCatalogItem>();
+  for (const ch of allChapters) {
+    chapterBySlug.set(ch.slug, ch);
+    // Also index normalized name
+    chapterBySlug.set(ch.name.toLowerCase().replace(/[^a-z0-9]/g, ""), ch);
+  }
 
-    for (const term of searchTerms) {
-      if (term.length < 2) continue;
-      const regex = new RegExp(`\\b${escapeRegExp(term)}\\b`, "i");
-      if (regex.test(lower)) {
-        const score = term.length;
-        if (score > bestMatchScore) {
-          bestMatchScore = score;
-          matchedChapter = chapter;
-        }
-      } else if (lower.includes(term)) {
-        const score = term.length * 0.8;
-        if (score > bestMatchScore) {
-          bestMatchScore = score;
-          matchedChapter = chapter;
+  // A. Check against TOPIC_KEYWORD_MAP
+  for (const topic of TOPIC_KEYWORD_MAP) {
+    const targetChapter = chapterBySlug.get(topic.slug);
+    if (!targetChapter) continue;
+
+    for (const kw of topic.keywords) {
+      const cleanKw = kw.toLowerCase();
+      // Match word boundary or exact phrase
+      if (lower.includes(cleanKw)) {
+        // Score based on keyword specificity (longer phrase = much higher score)
+        const score = cleanKw.length * 2 + (cleanKw.split(" ").length * 5);
+        if (score > bestScore) {
+          bestScore = score;
+          bestChapter = targetChapter;
         }
       }
     }
   }
 
-  // Fallback to first chapter if nothing matched
-  const activeChapter = matchedChapter || allChapters[0];
+  // B. Check direct DB chapter names and words
+  for (const ch of allChapters) {
+    const cleanName = ch.name.toLowerCase();
+    if (lower.includes(cleanName)) {
+      const score = cleanName.length * 3;
+      if (score > bestScore) {
+        bestScore = score;
+        bestChapter = ch;
+      }
+    } else {
+      // Check significant words in chapter name
+      const words = cleanName.split(/\s+/).filter((w) => w.length > 3 && !["and", "the", "for", "with", "class"].includes(w));
+      for (const w of words) {
+        if (lower.includes(w)) {
+          const score = w.length * 1.5;
+          if (score > bestScore) {
+            bestScore = score;
+            bestChapter = ch;
+          }
+        }
+      }
+    }
+  }
+
+  // If still no chapter found, fallback to first chapter but with low confidence
+  const activeChapter = bestChapter || allChapters[0];
 
   // 2. Duration Detection (e.g. "2 hours", "1.5h", "45 mins", "90 minutes", "1 hr 30 mins")
   let durationMinutes = 45; // default fallback
 
-  const hourMatch = lower.match(/(\d+(?:\.\d+)?)\s*(?:hours?|hrs?|hr|h)\b/i);
-  const minMatch = lower.match(/(\d+)\s*(?:minutes?|mins?|min|m)\b/i);
-  const combinedMatch = lower.match(/(\d+)\s*(?:hours?|hrs?|hr|h)\s*(?:and)?\s*(\d+)\s*(?:minutes?|mins?|min|m)?\b/i);
+  const hourMatch = text.match(/(\d+(?:\.\d+)?)\s*(?:hours?|hrs?|hr|h)\b/i);
+  const minMatch = text.match(/(\d+)\s*(?:minutes?|mins?|min|m)\b/i);
+  const combinedMatch = text.match(/(\d+)\s*(?:hours?|hrs?|hr|h)\s*(?:and)?\s*(\d+)\s*(?:minutes?|mins?|min|m)?\b/i);
 
   if (combinedMatch) {
     const h = parseFloat(combinedMatch[1]) || 0;
@@ -187,16 +546,16 @@ function parseSingleSegment(
   let assisted = 0;
   let wrong = 0;
 
-  const qMatch = lower.match(/(\d+)\s*(?:questions?|pyqs?|mcqs?|qs?|problems?|numerical)\b/i);
+  const qMatch = text.match(/(\d+)\s*(?:questions?|pyqs?|mcqs?|qs?|problems?|numerical)\b/i);
   if (qMatch) {
     totalQuestions = parseInt(qMatch[1]) || 0;
   }
 
   // Check detailed breakdown
-  const correctMatch = lower.match(/(\d+)\s*(?:correct|right|independent|indep|done right)\b/i);
-  const assistMatch = lower.match(/(\d+)\s*(?:assisted|hints?|with help|solutions?)\b/i);
-  const wrongMatch = lower.match(/(\d+)\s*(?:wrong|incorrect|mistakes?|lost)\b/i);
-  const fractionMatch = lower.match(/(\d+)\s*\/\s*(\d+)/);
+  const correctMatch = text.match(/(\d+)\s*(?:correct|right|independent|indep|done right)\b/i);
+  const assistMatch = text.match(/(\d+)\s*(?:assisted|hints?|with help|solutions?)\b/i);
+  const wrongMatch = text.match(/(\d+)\s*(?:wrong|incorrect|mistakes?|lost)\b/i);
+  const fractionMatch = text.match(/(\d+)\s*\/\s*(\d+)/);
 
   if (fractionMatch) {
     const num = parseInt(fractionMatch[1]);
@@ -224,31 +583,31 @@ function parseSingleSegment(
   // 4. Activity Type Detection
   let activityType: "MCQ" | "THEORY" | "LECTURE" | "REVISION" = totalQuestions > 0 ? "MCQ" : "THEORY";
 
-  if (/\b(?:lecture|class|video|watched|session|coaching lecture)\b/i.test(lower)) {
+  if (/\b(?:lecture|class|video|watched|session|coaching lecture)\b/i.test(text)) {
     activityType = "LECTURE";
-  } else if (/\b(?:revis(?:ed|ion)|formula|active recall|forgotten|cheat sheet)\b/i.test(lower)) {
+  } else if (/\b(?:revis(?:ed|ion)|formula|active recall|forgotten|cheat sheet)\b/i.test(text)) {
     activityType = "REVISION";
-  } else if (totalQuestions > 0 || /\b(?:pyq|mcq|solve|practic(?:e|ed)|questions?)\b/i.test(lower)) {
+  } else if (totalQuestions > 0 || /\b(?:pyq|mcq|solve|practic(?:e|ed)|questions?)\b/i.test(text)) {
     activityType = "MCQ";
-  } else if (/\b(?:read|notes|theory|concept|ncert|module read)\b/i.test(lower)) {
+  } else if (/\b(?:read|notes|theory|concept|ncert|module read)\b/i.test(text)) {
     activityType = "THEORY";
   }
 
   // 5. Source Detection
   let source = "JEE_MAIN_PYQ";
-  if (/\b(?:adv|advanced|jee advanced)\b/i.test(lower)) {
+  if (/\b(?:adv|advanced|jee advanced)\b/i.test(text)) {
     source = "JEE_ADV_PYQ";
-  } else if (/\b(?:hcv|h\.c\. verma|hc verma)\b/i.test(lower)) {
+  } else if (/\b(?:hcv|h\.c\. verma|hc verma)\b/i.test(text)) {
     source = "HCV";
-  } else if (/\b(?:cengage|bm sharma|tewani)\b/i.test(lower)) {
+  } else if (/\b(?:cengage|bm sharma|tewani)\b/i.test(text)) {
     source = "CENGAGE_MODULE";
-  } else if (/\b(?:allen|resonance|fiitjee|coaching|module)\b/i.test(lower)) {
+  } else if (/\b(?:allen|resonance|fiitjee|coaching|module|ms chouhan)\b/i.test(text)) {
     source = "CENGAGE_MODULE";
-  } else if (/\b(?:irodov|krotov|pathfinder)\b/i.test(lower)) {
+  } else if (/\b(?:irodov|krotov|pathfinder)\b/i.test(text)) {
     source = "JEE_ADV_PYQ";
   }
 
-  const confidence = matchedChapter ? 95 : 60;
+  const confidence = bestChapter ? 98 : 40;
 
   return {
     id: Math.random().toString(36).substring(2, 9),
@@ -266,8 +625,4 @@ function parseSingleSegment(
     notes: text,
     confidence,
   };
-}
-
-function escapeRegExp(string: string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

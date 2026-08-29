@@ -375,13 +375,37 @@ export function FocusSessionView({
 
       // Clean up localStorage
       localStorage.removeItem(FOCUS_STORAGE_KEY);
-      startTimestampRef.current = null;
-      accumulatedSecondsRef.current = 0;
     } catch (err) {
       console.error("Failed to save focus session:", err);
     } finally {
       setIsSaving(false);
     }
+  };
+
+  // Discard / End Session WITHOUT adding to progress
+  const handleDiscardSession = () => {
+    const isMeaningful = seconds > 10 || questionLogs.length > 0;
+    if (isMeaningful) {
+      if (
+        !window.confirm(
+          "⚠️ End session WITHOUT saving to progress?\n\nThis will discard " +
+            Math.round(seconds / 60) +
+            " minutes and " +
+            questionLogs.length +
+            " logged MCQs. They will NOT be added to your daily required targets or readiness."
+        )
+      ) {
+        return;
+      }
+    }
+
+    setIsRunning(false);
+    setIsSessionActive(false);
+    setSeconds(0);
+    setQuestionLogs([]);
+    startTimestampRef.current = null;
+    accumulatedSecondsRef.current = 0;
+    localStorage.removeItem(FOCUS_STORAGE_KEY);
   };
 
   // Format active timer HH:MM:SS
@@ -705,7 +729,7 @@ export function FocusSessionView({
               </div>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-2 shrink-0 flex-wrap">
               <button
                 onClick={handleTogglePauseResume}
                 className={cn(
@@ -719,10 +743,22 @@ export function FocusSessionView({
                 <span>{isRunning ? "Pause" : "Resume"}</span>
               </button>
 
+              {/* End Without Adding (Discard) */}
+              <button
+                onClick={handleDiscardSession}
+                className="px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 bg-zinc-100 dark:bg-zinc-900 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-zinc-200 dark:border-zinc-800 hover:border-rose-300 dark:hover:border-rose-800 transition-all cursor-pointer flex items-center gap-1"
+                title="End timer without saving or adding this time/MCQs to your required daily progress"
+              >
+                <X className="w-3.5 h-3.5" />
+                <span>End Without Adding</span>
+              </button>
+
+              {/* Save & Add to Progress */}
               <button
                 onClick={handleEndSession}
                 disabled={isSaving}
-                className="px-4 py-1.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white shadow-sm transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                className="px-4 py-1.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-sm transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                title="Finish session and add to daily progress and chapter readiness"
               >
                 <Square className="w-3.5 h-3.5 fill-current" />
                 <span>{isSaving ? "Saving..." : "Finish & Save"}</span>
