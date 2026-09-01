@@ -18,6 +18,7 @@ import {
   Compass,
   CheckCircle2,
   AlertTriangle,
+  BookOpen,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -530,6 +531,38 @@ export function AnalyticsView({ overview }: { overview: any }) {
           </span>
         </div>
       </div>
+
+      {/* 9. Biology Side Track Analytics Callout */}
+      {overview.biologyOverview && (
+        <div className="p-5 rounded-2xl border border-purple-500/30 bg-gradient-to-r from-purple-950/30 via-zinc-950 to-purple-950/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/30 shrink-0">
+              <BookOpen className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                  Biology (Botany &amp; Zoology) Side Track
+                </h3>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-600 dark:text-purple-400 font-bold">
+                  Tracked Independently
+                </span>
+              </div>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                {overview.biologyOverview.chapterCount} Chapters • {overview.biologyOverview.readiness}% Average Readiness (Cl 11: {overview.biologyOverview.class11Readiness}%, Cl 12: {overview.biologyOverview.class12Readiness}%) • Isolated from JEE PCM study targets.
+              </p>
+            </div>
+          </div>
+
+          <Link
+            href="/biology"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-xs transition-all active:scale-95 shrink-0 self-start sm:self-auto"
+          >
+            <span>View Biology Track</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

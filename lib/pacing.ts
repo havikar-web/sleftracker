@@ -22,7 +22,7 @@ export interface PacingMetrics {
   remainingQuestions: number;
   requiredDailyQuestions: number;
   
-  // Subject Breakdowns
+  // Subject Breakdowns (PCM Core JEE)
   subjectBreakdown: {
     name: string;
     shortName: string;
@@ -34,6 +34,20 @@ export interface PacingMetrics {
     requiredDailyMinutes: number;
     chapterCount: number;
   }[];
+
+  // Biology Side Track (Isolated from core JEE pacing)
+  biologySummary?: {
+    name: string;
+    shortName: string;
+    color: string;
+    chapterCount: number;
+    totalHours: number;
+    completedHours: number;
+    remainingHours: number;
+    totalQuestionsTarget: number;
+    completedQuestions: number;
+    readiness: number;
+  } | null;
   
   // Pacing Health & Status
   todayLoggedMinutes: number;
@@ -71,6 +85,10 @@ export async function calculateDailyStudyPacing(userId: string = "jee_student_pr
     orderBy: { displayOrder: "asc" },
   });
 
+  // Separate core JEE PCM subjects from Biology side track
+  const pcmSubjects = subjects.filter((s) => s.name !== "Biology");
+  const bioSubject = subjects.find((s) => s.name === "Biology");
+
   let totalSyllabusHours = 0;
   let completedHours = 0;
   let totalQuestionTarget = 0;
@@ -97,7 +115,8 @@ export async function calculateDailyStudyPacing(userId: string = "jee_student_pr
   });
   const todayLoggedQuestions = todayPracticeSessions.reduce((acc, s) => acc + s.questions, 0);
 
-  const subjectBreakdown = subjects.map((sub) => {
+  // Subject breakdown for PCM core JEE
+  const subjectBreakdown = pcmSubjects.map((sub) => {
     let subTotalHours = 0;
     let subCompletedHours = 0;
     let subQuestionsTarget = 0;
@@ -142,6 +161,41 @@ export async function calculateDailyStudyPacing(userId: string = "jee_student_pr
     };
   });
 
+  // Calculate Biology Side Track summary separately
+  let biologySummary = null;
+  if (bioSubject) {
+    let bioTotalH = 0;
+    let bioCompletedH = 0;
+    let bioQTarget = 0;
+    let bioQDone = 0;
+    let bioReadinessSum = 0;
+
+    for (const chap of bioSubject.chapters) {
+      bioTotalH += chap.estimatedHours || 12;
+      const progress = chap.progress[0];
+      const readiness = progress?.readinessScore || 0;
+      bioReadinessSum += readiness;
+      bioQDone += progress?.questionsSolved || 0;
+      bioQTarget += chap.defaultQuestionTarget || 120;
+      const studyMins = progress?.studyMinutes || 0;
+      const chapCompletedH = Math.min(chap.estimatedHours || 12, Math.round((studyMins / 60) * 10) / 10 + (readiness >= 90 ? (chap.estimatedHours || 12) : (readiness / 100) * (chap.estimatedHours || 12)));
+      bioCompletedH += chapCompletedH;
+    }
+
+    biologySummary = {
+      name: "Biology",
+      shortName: "BIO",
+      color: "#a855f7",
+      chapterCount: bioSubject.chapters.length,
+      totalHours: bioTotalH,
+      completedHours: Math.round(bioCompletedH * 10) / 10,
+      remainingHours: Math.max(0, Math.round((bioTotalH - bioCompletedH) * 10) / 10),
+      totalQuestionsTarget: bioQTarget,
+      completedQuestions: bioQDone,
+      readiness: bioSubject.chapters.length > 0 ? Math.round(bioReadinessSum / bioSubject.chapters.length) : 0,
+    };
+  }
+
   const remainingHours = Math.max(0, totalSyllabusHours - completedHours);
   const requiredDailyStudyHours = Math.round((remainingHours / daysRemaining) * 10) / 10;
   const requiredDailyStudyMinutes = Math.round((remainingHours / daysRemaining) * 60);
@@ -176,6 +230,7 @@ export async function calculateDailyStudyPacing(userId: string = "jee_student_pr
     remainingQuestions,
     requiredDailyQuestions,
     subjectBreakdown,
+    biologySummary,
     todayLoggedMinutes,
     todayLoggedHours,
     todayLoggedQuestions,

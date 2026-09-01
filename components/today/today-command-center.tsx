@@ -1012,6 +1012,36 @@ export function TodayCommandCenter({
         )}
       </div>
 
+      {/* 8. BIOLOGY SIDE TRACK PROMO / QUICK JUMP (Completely separated from core JEE PCM) */}
+      <div className="p-4 sm:p-5 rounded-2xl border border-purple-500/30 bg-gradient-to-r from-purple-950/20 via-zinc-950 to-purple-950/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/30 shrink-0">
+            <BookOpen className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                Biology Side Track (Botany &amp; Zoology)
+              </h3>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-600 dark:text-purple-400 font-bold">
+                Isolated Track
+              </span>
+            </div>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+              31 NCERT chapters tracked independently without affecting your core JEE 760-hour PCM pacing.
+            </p>
+          </div>
+        </div>
+
+        <Link
+          href="/biology"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-xs transition-all active:scale-95 shrink-0 self-start sm:self-auto"
+        >
+          <span>Open Biology Hub</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </div>
+
       {/* Target Chapters Multi-Select Modal */}
       {targetPickerOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">

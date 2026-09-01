@@ -121,6 +121,40 @@ export function Sidebar({ onOpenSearch }: { onOpenSearch?: () => void }) {
           </nav>
         </div>
 
+        {/* Side Tracks */}
+        <div>
+          <div className="px-2 mb-2 text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider flex items-center justify-between">
+            <span>Side Tracks</span>
+            <span className="text-[9px] px-1.5 py-0.2 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold border border-purple-500/20">
+              Non-PCM
+            </span>
+          </div>
+          <nav className="space-y-1">
+            <Link
+              href="/biology"
+              className={cn(
+                "flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-colors",
+                pathname.startsWith("/biology")
+                  ? "bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 font-bold border border-purple-200 dark:border-purple-800/60 shadow-xs"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-purple-600 dark:hover:text-purple-300 hover:bg-zinc-50 dark:hover:bg-zinc-900/60"
+              )}
+            >
+              <div className="flex items-center gap-3">
+                <BookOpen
+                  className={cn(
+                    "w-4 h-4",
+                    pathname.startsWith("/biology") ? "text-purple-600 dark:text-purple-400" : "text-zinc-400"
+                  )}
+                />
+                <span>Biology (Botany &amp; Zoo)</span>
+              </div>
+              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-purple-500/15 text-purple-600 dark:text-purple-400 font-bold">
+                31 Ch
+              </span>
+            </Link>
+          </nav>
+        </div>
+
         {/* Deep Tools Nav */}
         <div>
           <div className="px-2 mb-2 text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">

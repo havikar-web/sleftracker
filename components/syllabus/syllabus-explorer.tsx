@@ -238,6 +238,7 @@ export function SyllabusExplorer({ subjects: initialSubjects }: { subjects: any[
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
         {subjects.map((sub) => {
           const isActive = sub.name.toLowerCase() === selectedSubject.toLowerCase();
+          const isBio = sub.name === "Biology";
           const subColors = getSubjectColor(sub.name);
           return (
             <button
@@ -247,13 +248,19 @@ export function SyllabusExplorer({ subjects: initialSubjects }: { subjects: any[
                 setSearchTerm("");
               }}
               className={cn(
-                "px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all border",
+                "px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all border flex items-center gap-1.5 cursor-pointer",
                 isActive
                   ? cn(subColors.badge, "border-current shadow-sm font-bold")
                   : "bg-white dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800/80 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200"
               )}
             >
-              {sub.name} ({sub.chapters?.length || 0})
+              <span>{sub.name}</span>
+              <span className="opacity-70 text-[10px]">({sub.chapters?.length || 0})</span>
+              {isBio && (
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-600 dark:text-purple-400 font-bold">
+                  Side Track
+                </span>
+              )}
             </button>
           );
         })}

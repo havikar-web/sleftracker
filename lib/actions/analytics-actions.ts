@@ -19,6 +19,10 @@ export async function getAnalyticsOverview(userId: string = DEFAULT_USER_ID) {
     },
   });
 
+  // Separate PCM Core JEE from Biology Side Track
+  const pcmSubjects = subjects.filter((s) => s.name !== "Biology");
+  const bioSubject = subjects.find((s) => s.name === "Biology");
+
   let totalChapters = 0;
   let totalReadinessSum = 0;
   let class11Count = 0;
@@ -26,7 +30,7 @@ export async function getAnalyticsOverview(userId: string = DEFAULT_USER_ID) {
   let class12Count = 0;
   let class12ReadinessSum = 0;
 
-  const subjectStats = subjects.map((sub) => {
+  const subjectStats = pcmSubjects.map((sub) => {
     let subReadinessSum = 0;
     const chapCount = sub.chapters.length;
 
@@ -55,6 +59,41 @@ export async function getAnalyticsOverview(userId: string = DEFAULT_USER_ID) {
       chapterCount: chapCount,
     };
   }).filter((s) => s.chapterCount > 0);
+
+  // Dedicated Biology Side Track Overview
+  let biologyOverview = null;
+  if (bioSubject) {
+    let bioReadinessSum = 0;
+    let bioClass11Sum = 0;
+    let bioClass11Count = 0;
+    let bioClass12Sum = 0;
+    let bioClass12Count = 0;
+
+    bioSubject.chapters.forEach((chap) => {
+      const r = chap.progress[0]?.readinessScore || 0;
+      bioReadinessSum += r;
+      if (chap.classLevel === 11) {
+        bioClass11Count++;
+        bioClass11Sum += r;
+      } else {
+        bioClass12Count++;
+        bioClass12Sum += r;
+      }
+    });
+
+    biologyOverview = {
+      id: bioSubject.id,
+      name: "Biology",
+      shortName: "BIO",
+      color: "#a855f7",
+      chapterCount: bioSubject.chapters.length,
+      readiness: bioSubject.chapters.length > 0 ? Math.round(bioReadinessSum / bioSubject.chapters.length) : 0,
+      class11Count: bioClass11Count,
+      class11Readiness: bioClass11Count > 0 ? Math.round(bioClass11Sum / bioClass11Count) : 0,
+      class12Count: bioClass12Count,
+      class12Readiness: bioClass12Count > 0 ? Math.round(bioClass12Sum / bioClass12Count) : 0,
+    };
+  }
 
   const overallReadiness =
     totalChapters > 0 ? Math.round(totalReadinessSum / totalChapters) : 0;
@@ -373,6 +412,7 @@ export async function getAnalyticsOverview(userId: string = DEFAULT_USER_ID) {
     class11Readiness,
     class12Readiness,
     subjectStats,
+    biologyOverview,
     todayQuestions: todayPractice._sum.questions || 0,
     todayStudyMinutes: todayStudy._sum.durationMinutes || 0,
     todayTasksTotal: todayTasksTotal || 0,
