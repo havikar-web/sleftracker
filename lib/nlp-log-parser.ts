@@ -423,6 +423,226 @@ const TOPIC_KEYWORD_MAP: { slug: string; keywords: string[] }[] = [
       "biomolecules", "carbohydrates", "glucose", "fructose", "amino acids",
       "proteins", "peptide bond", "nucleic acids", "dna rna", "vitamins"
     ]
+  },
+
+  // BIOLOGY
+  {
+    slug: "living-world-and-classification",
+    keywords: [
+      "living world", "biological classification", "taxonomic hierarchy", "binomial nomenclature",
+      "monera", "protista", "fungi", "eubacteria", "archaebacteria", "protozoa", "viruses", "viroids", "prions", "lichens"
+    ]
+  },
+  {
+    slug: "plant-kingdom",
+    keywords: [
+      "plant kingdom", "algae", "bryophytes", "pteridophytes", "gymnosperms", "angiosperms",
+      "chlorophyceae", "phaeophyceae", "rhodophyceae", "prothallus", "alternation of generations"
+    ]
+  },
+  {
+    slug: "animal-kingdom",
+    keywords: [
+      "animal kingdom", "porifera", "coelenterata", "cnidaria", "ctenophora", "platyhelminthes",
+      "aschelminthes", "annelida", "arthropoda", "mollusca", "echinodermata", "hemichordata", "chordata", "vertebrates"
+    ]
+  },
+  {
+    slug: "morphology-flowering-plants",
+    keywords: [
+      "morphology of flowering plants", "morphology plants", "root modifications", "stem modifications",
+      "phyllotaxy", "inflorescence", "aestivation", "placentation", "solanaceae", "fabaceae", "liliaceae"
+    ]
+  },
+  {
+    slug: "anatomy-flowering-plants",
+    keywords: [
+      "anatomy of flowering plants", "plant anatomy", "meristematic tissue", "xylem", "phloem",
+      "dicot root", "monocot root", "dicot stem", "monocot stem", "secondary growth", "vascular cambium", "cork cambium"
+    ]
+  },
+  {
+    slug: "structural-organisation-animals",
+    keywords: [
+      "structural organisation in animals", "animal tissues", "epithelial tissue", "connective tissue",
+      "muscular tissue", "frog anatomy", "cockroach anatomy"
+    ]
+  },
+  {
+    slug: "cell-the-unit-of-life",
+    keywords: [
+      "cell the unit of life", "cell biology", "prokaryotic cell", "eukaryotic cell", "fluid mosaic model",
+      "plasma membrane", "endoplasmic reticulum", "golgi apparatus", "lysosomes", "mitochondria", "chloroplast", "ribosomes", "nucleus"
+    ]
+  },
+  {
+    slug: "biomolecules-bio",
+    keywords: [
+      "biomolecules bio", "primary metabolites", "secondary metabolites", "enzymes biology",
+      "co-factors", "activation energy biology", "polysaccharides bio"
+    ]
+  },
+  {
+    slug: "cell-cycle-and-cell-division",
+    keywords: [
+      "cell cycle and cell division", "cell cycle", "cell division", "mitosis", "meiosis",
+      "interphase", "prophase", "metaphase", "anaphase", "telophase", "crossing over", "pachytene", "chiasmata"
+    ]
+  },
+  {
+    slug: "photosynthesis",
+    keywords: [
+      "photosynthesis", "photosynthesis in higher plants", "light reaction", "dark reaction", "calvin cycle",
+      "c3 pathway", "c4 pathway", "kranz anatomy", "photorespiration", "z scheme", "photophosphorylation", "rubisco"
+    ]
+  },
+  {
+    slug: "respiration-in-plants",
+    keywords: [
+      "respiration in plants", "plant respiration", "glycolysis", "emp pathway", "krebs cycle",
+      "tca cycle", "ets", "oxidative phosphorylation", "fermentation bio", "respiratory quotient", "rq"
+    ]
+  },
+  {
+    slug: "plant-growth-development",
+    keywords: [
+      "plant growth and development", "plant growth", "phytohormones", "auxin", "gibberellin",
+      "cytokinin", "ethylene", "abscisic acid", "aba", "photoperiodism", "vernalization"
+    ]
+  },
+  {
+    slug: "breathing-exchange-gases",
+    keywords: [
+      "breathing and exchange of gases", "breathing", "respiration human", "respiratory volumes",
+      "tidal volume", "vital capacity", "gas transport", "oxygen dissociation curve", "bohr effect", "emphysema", "asthma"
+    ]
+  },
+  {
+    slug: "body-fluids-circulation",
+    keywords: [
+      "body fluids and circulation", "body fluids", "blood circulation", "blood groups", "abo grouping",
+      "rh factor", "cardiac cycle", "ecg", "double circulation", "pacemaker", "sa node", "heart sounds"
+    ]
+  },
+  {
+    slug: "excretory-products-elimination",
+    keywords: [
+      "excretory products and their elimination", "excretion", "human excretory system", "nephron",
+      "glomerular filtration", "gfr", "counter current mechanism", "raas", "renin", "micturition", "dialysis"
+    ]
+  },
+  {
+    slug: "locomotion-and-movement",
+    keywords: [
+      "locomotion and movement", "locomotion", "muscle contraction", "sliding filament theory",
+      "sarcomere", "actin myosin", "skeletal system", "joints", "synovial joints", "arthritis"
+    ]
+  },
+  {
+    slug: "neural-control-coordination",
+    keywords: [
+      "neural control and coordination", "neural control", "neuron", "nerve impulse", "action potential",
+      "synapse", "cns", "brain human", "forebrain", "reflex arc", "eye structure", "ear structure"
+    ]
+  },
+  {
+    slug: "chemical-coordination-integration",
+    keywords: [
+      "chemical coordination and integration", "endocrine system", "hormones", "pituitary gland",
+      "thyroid gland", "adrenal gland", "pancreas insulin", "parathyroid", "hormone action mechanism"
+    ]
+  },
+  {
+    slug: "sexual-reproduction-flowering-plants",
+    keywords: [
+      "sexual reproduction in flowering plants", "flowering plants reproduction", "microsporogenesis",
+      "megasporogenesis", "embryo sac", "pollination", "double fertilization", "triple fusion", "apomixis"
+    ]
+  },
+  {
+    slug: "human-reproduction",
+    keywords: [
+      "human reproduction", "male reproductive system", "female reproductive system", "spermatogenesis",
+      "oogenesis", "menstrual cycle", "fertilization human", "blastocyst", "implantation", "placenta", "parturition"
+    ]
+  },
+  {
+    slug: "reproductive-health",
+    keywords: [
+      "reproductive health", "contraception", "birth control", "iud", "saheli", "mtp",
+      "stis", "infertility", "art", "ivf", "zift", "gift", "icsi", "amniocentesis"
+    ]
+  },
+  {
+    slug: "principles-of-inheritance",
+    keywords: [
+      "principles of inheritance and variation", "genetics", "mendel laws", "monohybrid cross",
+      "dihybrid cross", "incomplete dominance", "codominance", "linkage recombination", "pedigree analysis",
+      "sex determination", "haemophilia", "sickle cell anaemia", "down syndrome", "turner syndrome"
+    ]
+  },
+  {
+    slug: "molecular-basis-of-inheritance",
+    keywords: [
+      "molecular basis of inheritance", "molecular genetics", "dna structure", "dna replication",
+      "transcription", "genetic code", "translation protein synthesis", "lac operon", "human genome project", "hgp", "dna fingerprinting"
+    ]
+  },
+  {
+    slug: "evolution-bio",
+    keywords: [
+      "evolution biology", "origin of life", "miller urey experiment", "homologous organs",
+      "analogous organs", "adaptive radiation", "darwinism", "hardy weinberg principle", "human evolution", "natural selection"
+    ]
+  },
+  {
+    slug: "human-health-disease",
+    keywords: [
+      "human health and disease", "human health", "immunity", "innate immunity", "acquired immunity",
+      "antibodies", "aids", "hiv", "cancer oncology", "malaria", "typhoid", "vaccines", "drug abuse"
+    ]
+  },
+  {
+    slug: "microbes-human-welfare",
+    keywords: [
+      "microbes in human welfare", "microbes", "fermentation industrial", "antibiotics",
+      "sewage treatment", "biogas", "methanogens", "biocontrol agents", "biofertilizers", "bt"
+    ]
+  },
+  {
+    slug: "biotechnology-principles",
+    keywords: [
+      "biotechnology principles and processes", "biotechnology", "recombinant dna", "restriction enzymes",
+      "cloning vectors", "pbr322", "gel electrophoresis", "pcr", "polymerase chain reaction", "bioreactors"
+    ]
+  },
+  {
+    slug: "biotechnology-applications",
+    keywords: [
+      "biotechnology and its applications", "biotech applications", "bt cotton", "rnai",
+      "rna interference", "genetically engineered insulin", "gene therapy", "transgenic animals", "biopiracy"
+    ]
+  },
+  {
+    slug: "organisms-and-populations",
+    keywords: [
+      "organisms and populations", "ecology", "adaptations", "population growth",
+      "exponential growth", "logistic growth", "mutualism", "commensalism", "parasitism", "predation", "competition ecology"
+    ]
+  },
+  {
+    slug: "ecosystem",
+    keywords: [
+      "ecosystem", "ecological pyramids", "productivity ecology", "decomposition",
+      "food chain", "food web", "trophic levels", "energy flow 10 percent", "nutrient cycling", "carbon cycle"
+    ]
+  },
+  {
+    slug: "biodiversity-conservation",
+    keywords: [
+      "biodiversity and conservation", "biodiversity", "species area relationship", "evil quartet",
+      "in situ conservation", "ex situ conservation", "national parks", "biosphere reserves", "biodiversity hotspots", "red data book"
+    ]
   }
 ];
 

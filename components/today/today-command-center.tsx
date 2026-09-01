@@ -1045,14 +1045,14 @@ export function TodayCommandCenter({
                   />
                 </div>
 
-                <div className="flex items-center gap-1">
-                  {["ALL", "Physics", "Chemistry", "Mathematics"].map((sub) => (
+                <div className="flex items-center gap-1 flex-wrap">
+                  {["ALL", "Physics", "Chemistry", "Mathematics", "Biology"].map((sub) => (
                     <button
                       key={sub}
                       type="button"
                       onClick={() => setModalSubjectFilter(sub)}
                       className={cn(
-                        "px-2.5 py-2 text-[11px] font-semibold rounded-xl border transition-all",
+                        "px-2.5 py-1.5 text-[11px] font-semibold rounded-xl border transition-all",
                         modalSubjectFilter === sub
                           ? "bg-zinc-900 dark:bg-zinc-800 text-white border-zinc-900 dark:border-zinc-700 shadow-sm"
                           : "bg-zinc-50 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100"

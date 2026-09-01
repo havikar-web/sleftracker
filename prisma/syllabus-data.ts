@@ -1150,5 +1150,605 @@ export const SYLLABUS_DATA: SubjectData[] = [
         ]
       }
     ]
+  },
+
+  // 4. BIOLOGY (31 Chapters — Botany & Zoology Comprehensive Mastery Track)
+  {
+    name: "Biology",
+    shortName: "BIO",
+    displayOrder: 4,
+    color: "#a855f7",
+    chapters: [
+      // Class 11 Biology
+      {
+        name: "The Living World & Biological Classification",
+        slug: "living-world-and-classification",
+        classLevel: 11,
+        historicalPriority: 85,
+        estimatedHours: 10,
+        hoursRange: "8–12 Hours",
+        defaultQuestionTarget: 120,
+        defaultPYQTarget: 60,
+        topics: [
+          "Characteristics of Living Organisms and Taxonomic Hierarchy",
+          "Binomial Nomenclature, Systematics and Taxonomical Aids",
+          "Five Kingdom Classification (Monera, Protista, Fungi, Plantae, Animalia)",
+          "Kingdom Monera: Archaebacteria, Eubacteria and Cyanobacteria",
+          "Kingdom Protista: Chrysophytes, Dinoflagellates, Euglenoids, Slime moulds, Protozoans",
+          "Kingdom Fungi: Phycomycetes, Ascomycetes, Basidiomycetes, Deuteromycetes",
+          "Viruses, Viroids, Prions and Lichens"
+        ]
+      },
+      {
+        name: "Plant Kingdom",
+        slug: "plant-kingdom",
+        classLevel: 11,
+        historicalPriority: 90,
+        estimatedHours: 12,
+        hoursRange: "10–14 Hours",
+        defaultQuestionTarget: 140,
+        defaultPYQTarget: 70,
+        topics: [
+          "Algae: Chlorophyceae, Phaeophyceae, Rhodophyceae characteristics & reproduction",
+          "Bryophytes: Liverworts and Mosses lifecycle and economic importance",
+          "Pteridophytes: Homosporous & Heterosporous lifecycle, Prothallus, Stelar system",
+          "Gymnosperms: Cycas, Pinus morphology, lifecycle, and naked seeds",
+          "Angiosperms: Monocots vs Dicots, Double fertilization overview",
+          "Plant Life Cycles and Alternation of Generations (Haplontic, Diplontic, Haplodiplontic)"
+        ]
+      },
+      {
+        name: "Animal Kingdom",
+        slug: "animal-kingdom",
+        classLevel: 11,
+        historicalPriority: 94,
+        estimatedHours: 14,
+        hoursRange: "12–16 Hours",
+        defaultQuestionTarget: 160,
+        defaultPYQTarget: 80,
+        topics: [
+          "Basis of Classification: Symmetry, Coelom, Germ layers, Segmentation",
+          "Non-Chordates: Porifera, Coelenterata (Cnidaria), Ctenophora, Platyhelminthes",
+          "Aschelminthes, Annelida, Arthropoda, Mollusca, Echinodermata, Hemichordata",
+          "Phylum Chordata: Urochordata, Cephalochordata, Vertebrata",
+          "Class Cyclostomata, Chondrichthyes, Osteichthyes",
+          "Class Amphibia, Reptilia, Aves, and Mammalia with key examples"
+        ]
+      },
+      {
+        name: "Morphology of Flowering Plants",
+        slug: "morphology-flowering-plants",
+        classLevel: 11,
+        historicalPriority: 91,
+        estimatedHours: 12,
+        hoursRange: "10–14 Hours",
+        defaultQuestionTarget: 140,
+        defaultPYQTarget: 70,
+        topics: [
+          "Root System: Tap root, Fibrous root, Adventitious root, Modifications",
+          "Stem: Nodes, Internodes, Subaerial, Aerial, and Underground stem modifications",
+          "Leaf: Venation (Reticulate, Parallel), Types of leaves, Phyllotaxy, Modifications",
+          "Inflorescence: Racemose and Cymose types",
+          "Flower: Parts (Calyx, Corolla, Androecium, Gynoecium), Aestivation, Placentation",
+          "Fruit and Seed: True, False, Parthenocarpic fruits, Dicot vs Monocot seed",
+          "Description of Families: Solanaceae, Fabaceae, Liliaceae, Brassicaceae"
+        ]
+      },
+      {
+        name: "Anatomy of Flowering Plants",
+        slug: "anatomy-flowering-plants",
+        classLevel: 11,
+        historicalPriority: 88,
+        estimatedHours: 10,
+        hoursRange: "8–12 Hours",
+        defaultQuestionTarget: 120,
+        defaultPYQTarget: 60,
+        topics: [
+          "Meristematic Tissues: Apical, Intercalary, Lateral meristems",
+          "Permanent Tissues: Simple (Parenchyma, Collenchyma, Sclerenchyma) and Complex (Xylem, Phloem)",
+          "Tissue Systems: Epidermal, Ground, and Vascular tissue systems",
+          "Anatomy of Dicotyledonous and Monocotyledonous Root and Stem",
+          "Anatomy of Dorsiventral (Dicot) and Isobilateral (Monocot) Leaf",
+          "Secondary Growth: Vascular cambium, Cork cambium (Phellogen), Heartwood and Sapwood"
+        ]
+      },
+      {
+        name: "Structural Organisation in Animals",
+        slug: "structural-organisation-animals",
+        classLevel: 11,
+        historicalPriority: 86,
+        estimatedHours: 10,
+        hoursRange: "8–12 Hours",
+        defaultQuestionTarget: 110,
+        defaultPYQTarget: 55,
+        topics: [
+          "Epithelial Tissue: Simple (Squamous, Cuboidal, Columnar, Ciliated) and Compound",
+          "Connective Tissue: Loose (Areolar, Adipose), Dense (Tendons, Ligaments), Specialized (Cartilage, Bone, Blood)",
+          "Muscular Tissue: Skeletal, Smooth, and Cardiac muscle fibers",
+          "Neural Tissue: Neurons and Neuroglial cells",
+          "Morphology, Anatomy, Digestive, Circulatory, Nervous, and Reproductive systems of Frog",
+          "Cockroach morphology and internal anatomy overview"
+        ]
+      },
+      {
+        name: "Cell: The Unit of Life",
+        slug: "cell-the-unit-of-life",
+        classLevel: 11,
+        historicalPriority: 95,
+        estimatedHours: 14,
+        hoursRange: "12–16 Hours",
+        defaultQuestionTarget: 150,
+        defaultPYQTarget: 75,
+        topics: [
+          "Cell Theory and Overview of Prokaryotic vs Eukaryotic Cell",
+          "Prokaryotic Cell: Cell envelope, Mesosomes, Plasmids, Flagella, Ribosomes",
+          "Cell Membrane: Fluid Mosaic Model of Singer and Nicolson, Membrane Transport",
+          "Endomembrane System: Endoplasmic Reticulum (RER, SER), Golgi Apparatus, Lysosomes, Vacuoles",
+          "Mitochondria and Plastids (Chloroplast, Chromoplast, Leucoplast) structure and semiautonomous nature",
+          "Ribosomes, Cytoskeleton, Cilia, Flagella, Centrosome and Centrioles",
+          "Nucleus: Nuclear envelope, Chromatin, Nucleolus, Types of Chromosomes (Metacentric, etc.)"
+        ]
+      },
+      {
+        name: "Biomolecules (Biology)",
+        slug: "biomolecules-bio",
+        classLevel: 11,
+        historicalPriority: 92,
+        estimatedHours: 12,
+        hoursRange: "10–14 Hours",
+        defaultQuestionTarget: 130,
+        defaultPYQTarget: 65,
+        topics: [
+          "Chemical Analysis of Living Tissues, Primary and Secondary Metabolites",
+          "Biomacromolecules: Proteins structure (Primary, Secondary, Tertiary, Quaternary)",
+          "Polysaccharides: Starch, Glycogen, Cellulose, Chitin",
+          "Lipids: Fatty acids, Glycerides, Phospholipids (Lecithin)",
+          "Nucleic Acids: DNA and RNA structure, Nucleosides, Nucleotides, Base pairing",
+          "Enzymes: Properties, Factors affecting activity, Mechanism of action, Classification, Co-factors and Co-enzymes"
+        ]
+      },
+      {
+        name: "Cell Cycle and Cell Division",
+        slug: "cell-cycle-and-cell-division",
+        classLevel: 11,
+        historicalPriority: 94,
+        estimatedHours: 10,
+        hoursRange: "8–12 Hours",
+        defaultQuestionTarget: 130,
+        defaultPYQTarget: 65,
+        topics: [
+          "Phases of Cell Cycle: Interphase (G1, S, G2 phases) and G0 (Quiescent) stage",
+          "M Phase (Mitosis): Prophase, Metaphase, Anaphase, Telophase, and Cytokinesis",
+          "Significance of Mitosis in growth and repair",
+          "Meiosis: Meiosis I (Prophase I: Leptotene, Zygotene, Pachytene, Diplotene, Diakinesis, Crossing over)",
+          "Metaphase I, Anaphase I, Telophase I, Interkinesis and Meiosis II stages",
+          "Significance of Meiosis in genetic variation and evolution"
+        ]
+      },
+      {
+        name: "Photosynthesis in Higher Plants",
+        slug: "photosynthesis",
+        classLevel: 11,
+        historicalPriority: 94,
+        estimatedHours: 14,
+        hoursRange: "12–16 Hours",
+        defaultQuestionTarget: 150,
+        defaultPYQTarget: 75,
+        topics: [
+          "Site of Photosynthesis, Chloroplast pigments (Chlorophyll a, b, Carotenoids), Absorption vs Action spectra",
+          "Light Reaction (Photochemical phase): Photosystems I and II, Light harvesting complexes",
+          "Electron Transport: Non-cyclic and Cyclic Photophosphorylation, Z-scheme",
+          "Splitting of Water and Chemiosmotic Hypothesis (Peter Mitchell)",
+          "Dark Reaction (Biosynthetic phase): Calvin Cycle (C3 pathway) - Carboxylation, Reduction, Regeneration",
+          "C4 Pathway (Hatch & Slack): Kranz anatomy, PEP carboxylase, Advantages over C3",
+          "Photorespiration (C2 cycle) and Factors affecting photosynthesis (Blackman's Law)"
+        ]
+      },
+      {
+        name: "Respiration in Plants",
+        slug: "respiration-in-plants",
+        classLevel: 11,
+        historicalPriority: 92,
+        estimatedHours: 12,
+        hoursRange: "10–14 Hours",
+        defaultQuestionTarget: 130,
+        defaultPYQTarget: 65,
+        topics: [
+          "Cellular Respiration overview, Aerobic vs Anaerobic respiration",
+          "Glycolysis (EMP Pathway): 10 steps, ATP investment and yield, Phosphorylation",
+          "Fermentation: Alcoholic and Lactic acid fermentation",
+          "Aerobic Respiration: Link reaction (Oxidative decarboxylation of Pyruvate to Acetyl-CoA)",
+          "Tricarboxylic Acid Cycle (TCA / Krebs Cycle / Citric Acid Cycle) steps and energetics",
+          "Electron Transport System (ETS) and Oxidative Phosphorylation, Complex I-V, ATP Synthase",
+          "Respiratory Balance Sheet, Amphibolic Pathway, and Respiratory Quotient (RQ)"
+        ]
+      },
+      {
+        name: "Plant Growth and Development",
+        slug: "plant-growth-development",
+        classLevel: 11,
+        historicalPriority: 89,
+        estimatedHours: 10,
+        hoursRange: "8–12 Hours",
+        defaultQuestionTarget: 110,
+        defaultPYQTarget: 55,
+        topics: [
+          "Characteristics of Plant Growth: Phases (Meristematic, Elongation, Maturation), Arithmetic & Geometric growth",
+          "Differentiation, Dedifferentiation, and Redifferentiation",
+          "Development and Plasticity in plants (Heterophylly)",
+          "Plant Growth Regulators (Phytohormones): Auxins, Gibberellins (GA), Cytokinins",
+          "Ethylene and Abscisic Acid (ABA / Stress hormone) physiological effects and applications",
+          "Photoperiodism (Short-day, Long-day, Day-neutral plants) and Vernalization"
+        ]
+      },
+      {
+        name: "Breathing and Exchange of Gases",
+        slug: "breathing-exchange-gases",
+        classLevel: 11,
+        historicalPriority: 90,
+        estimatedHours: 10,
+        hoursRange: "8–12 Hours",
+        defaultQuestionTarget: 120,
+        defaultPYQTarget: 60,
+        topics: [
+          "Human Respiratory System: Nostrils, Pharynx, Larynx, Trachea, Bronchi, Alveoli and Lungs",
+          "Mechanism of Breathing: Inspiration and Expiration, Diaphragm, Intercostal muscles",
+          "Respiratory Volumes and Capacities (TV, IRV, ERV, RV, IC, EC, FRC, VC, TLC)",
+          "Exchange of Gases: Partial pressures (pO2, pCO2) at alveoli and tissues",
+          "Transport of Gases: Transport of Oxygen (Oxyhaemoglobin, Oxygen dissociation curve, Bohr effect)",
+          "Transport of Carbon dioxide (Carbaminohaemoglobin, Bicarbonate ions, Chloride shift)",
+          "Regulation of Respiration (Respiratory rhythm centre, Pneumotaxic centre, Chemosensitive area)",
+          "Disorders: Asthma, Emphysema, Occupational Respiratory Disorders"
+        ]
+      },
+      {
+        name: "Body Fluids and Circulation",
+        slug: "body-fluids-circulation",
+        classLevel: 11,
+        historicalPriority: 92,
+        estimatedHours: 12,
+        hoursRange: "10–14 Hours",
+        defaultQuestionTarget: 130,
+        defaultPYQTarget: 65,
+        topics: [
+          "Composition of Blood: Plasma and Formed Elements (Erythrocytes, Leucocytes, Platelets)",
+          "Blood Groups: ABO system and Rh grouping, Erythroblastosis foetalis",
+          "Coagulation of Blood (Clotting cascade, Thromboplastin, Thrombin, Fibrin)",
+          "Lymph (Tissue fluid) composition and functions",
+          "Human Circulatory System: Structure of Heart, Cardiac muscle, Pacemaker (SA node, AV node)",
+          "Cardiac Cycle: Auricular systole, Ventricular systole, Joint diastole, Heart sounds (Lub, Dub)",
+          "Electrocardiogram (ECG): P-wave, QRS complex, T-wave interpretation",
+          "Double Circulation: Systemic and Pulmonary circuits, Hepatic portal system",
+          "Regulation of Cardiac Activity and Disorders: Hypertension, CAD, Angina, Heart failure"
+        ]
+      },
+      {
+        name: "Excretory Products and their Elimination",
+        slug: "excretory-products-elimination",
+        classLevel: 11,
+        historicalPriority: 92,
+        estimatedHours: 12,
+        hoursRange: "10–14 Hours",
+        defaultQuestionTarget: 130,
+        defaultPYQTarget: 65,
+        topics: [
+          "Modes of Excretion: Ammonotelism, Ureotelism, Uricotelism with examples",
+          "Human Excretory System: Kidneys, Ureters, Urinary bladder, Urethra",
+          "Structure of Nephron: Bowman's capsule, Glomerulus, PCT, Henle's Loop, DCT, Collecting duct",
+          "Urine Formation: Glomerular Filtration (GFR), Tubular Reabsorption, Tubular Secretion",
+          "Function of Tubules and Counter-Current Mechanism in Henle's loop and Vasa recta",
+          "Regulation of Kidney Function: Renin-Angiotensin-Aldosterone System (RAAS), ADH, ANF",
+          "Micturition reflex and Disorders: Uremia, Renal calculi, Glomerulonephritis, Dialysis"
+        ]
+      },
+      {
+        name: "Locomotion and Movement",
+        slug: "locomotion-and-movement",
+        classLevel: 11,
+        historicalPriority: 89,
+        estimatedHours: 10,
+        hoursRange: "8–12 Hours",
+        defaultQuestionTarget: 120,
+        defaultPYQTarget: 60,
+        topics: [
+          "Types of Movement: Amoeboid, Ciliary, Flagellar, Muscular",
+          "Skeletal Muscle structure: Epimysium, Perimysium, Sarcomere, Actin (Thin) and Myosin (Thick) myofilaments",
+          "Mechanism of Muscle Contraction: Sliding Filament Theory, Neuromuscular junction, Calcium release, Cross-bridge cycle",
+          "Human Skeletal System: Axial skeleton (Skull, Vertebral column, Ribs, Sternum) and Appendicular skeleton (Girdles, Limbs)",
+          "Joints: Fibrous, Cartilaginous, Synovial joints (Ball & socket, Hinge, Pivot, Gliding, Saddle)",
+          "Disorders: Myasthenia gravis, Tetany, Muscular dystrophy, Arthritis, Osteoporosis, Gout"
+        ]
+      },
+      {
+        name: "Neural Control and Coordination",
+        slug: "neural-control-coordination",
+        classLevel: 11,
+        historicalPriority: 92,
+        estimatedHours: 12,
+        hoursRange: "10–14 Hours",
+        defaultQuestionTarget: 130,
+        defaultPYQTarget: 65,
+        topics: [
+          "Structure of Neuron: Dendrites, Cyton, Axon, Myelinated vs Unmyelinated nerve fibers",
+          "Generation and Conduction of Nerve Impulse: Resting membrane potential, Depolarization, Action potential, Repolarization",
+          "Transmission of Impulses: Electrical and Chemical Synapses, Neurotransmitters",
+          "Central Nervous System (CNS): Brain structure (Forebrain: Cerebrum, Thalamus, Hypothalamus; Midbrain; Hindbrain: Cerebellum, Pons, Medulla)",
+          "Spinal Cord and Reflex Action / Reflex Arc",
+          "Sensory Reception and Processing: Structure and mechanism of Eye (Vision) and Ear (Hearing & Balance)"
+        ]
+      },
+      {
+        name: "Chemical Coordination and Integration",
+        slug: "chemical-coordination-integration",
+        classLevel: 11,
+        historicalPriority: 93,
+        estimatedHours: 12,
+        hoursRange: "10–14 Hours",
+        defaultQuestionTarget: 130,
+        defaultPYQTarget: 65,
+        topics: [
+          "Endocrine Glands and Hormones: Difference between Exocrine and Endocrine",
+          "Hypothalamus hormones (Releasing and Inhibiting hormones)",
+          "Pituitary Gland: Adenohypophysis (GH, PRL, TSH, ACTH, LH, FSH) and Neurohypophysis (Oxytocin, Vasopressin)",
+          "Thyroid Gland (T3, T4, Calcitonin) and Parathyroid Gland (PTH)",
+          "Adrenal Gland: Adrenal Cortex (Corticoids) and Adrenal Medulla (Adrenaline, Noradrenaline)",
+          "Pancreas (Islets of Langerhans: Insulin, Glucagon), Gonads (Testes: Testosterone; Ovaries: Estrogen, Progesterone)",
+          "Hormones of Heart (ANF), Kidney (Erythropoietin), and GI Tract (Gastrin, Secretin, CCK, GIP)",
+          "Mechanism of Hormone Action: Protein hormones (Second messengers: cAMP, IP3) vs Steroid hormones (Nuclear receptors)",
+          "Endocrine Disorders: Dwarfism, Acromegaly, Goitre, Diabetes mellitus, Diabetes insipidus, Addison's, Cushing's"
+        ]
+      },
+
+      // Class 12 Biology
+      {
+        name: "Sexual Reproduction in Flowering Plants",
+        slug: "sexual-reproduction-flowering-plants",
+        classLevel: 12,
+        historicalPriority: 95,
+        estimatedHours: 14,
+        hoursRange: "12–16 Hours",
+        defaultQuestionTarget: 150,
+        defaultPYQTarget: 75,
+        topics: [
+          "Flower structure and Pre-fertilization events",
+          "Microsporogenesis and Pollen grain structure, viability, and pollen allergy",
+          "Megasporogenesis and Female Gametophyte (Embryo sac) development, 7-celled 8-nucleate structure",
+          "Pollination: Autogamy, Geitonogamy, Xenogamy; Agents of pollination (Wind, Water, Insects)",
+          "Outbreeding devices and Pollen-pistil interaction",
+          "Double Fertilization: Syngamy and Triple Fusion (PEN formation)",
+          "Post-fertilization events: Endosperm development (Free nuclear, Cellular), Embryo development (Dicot & Monocot)",
+          "Seed, Fruit development, Perisperm, Apomixis and Polyembryony"
+        ]
+      },
+      {
+        name: "Human Reproduction",
+        slug: "human-reproduction",
+        classLevel: 12,
+        historicalPriority: 96,
+        estimatedHours: 14,
+        hoursRange: "12–16 Hours",
+        defaultQuestionTarget: 160,
+        defaultPYQTarget: 80,
+        topics: [
+          "Male Reproductive System: Testes, Seminiferous tubules, Leydig cells, Sertoli cells, Accessory ducts & glands",
+          "Female Reproductive System: Ovaries, Fallopian tubes, Uterus, Cervix, Vagina, Mammary glands",
+          "Spermatogenesis: Hormonal control, Sperm morphology (Acrosome, Nucleus, Middle piece, Tail)",
+          "Oogenesis: Primary oocyte, Graafian follicle, Corpus luteum formation",
+          "Menstrual Cycle: Menstrual, Follicular (Proliferative), Ovulatory, and Luteal (Secretory) phases, Hormonal regulation (LH surge, FSH, Estrogen, Progesterone)",
+          "Fertilization, Capacitation, Cortical reaction, Cleavage, Blastocyst formation, and Implantation",
+          "Pregnancy, Placenta structure and endocrine function (hCG, hPL, Relaxin)",
+          "Parturition (Foetal ejection reflex, Oxytocin) and Lactation (Colostrum)"
+        ]
+      },
+      {
+        name: "Reproductive Health",
+        slug: "reproductive-health",
+        classLevel: 12,
+        historicalPriority: 88,
+        estimatedHours: 8,
+        hoursRange: "6–10 Hours",
+        defaultQuestionTarget: 100,
+        defaultPYQTarget: 50,
+        topics: [
+          "Reproductive Health problems, Amniocentesis and its statutory ban",
+          "Population Explosion and Birth Control methods: Natural, Barrier, IUDs, Oral pills (Saheli), Injectables, Implants, Surgical (Vasectomy, Tubectomy)",
+          "Medical Termination of Pregnancy (MTP) and legal provisions",
+          "Sexually Transmitted Infections (STIs): Gonorrhoea, Syphilis, Genital herpes, Chlamydiasis, Hepatitis-B, HIV-AIDS",
+          "Infertility and Assisted Reproductive Technologies (ART): IVF-ET (ZIFT, IUT), GIFT, ICSI, AI, IUI, Surrogacy"
+        ]
+      },
+      {
+        name: "Principles of Inheritance and Variation (Genetics)",
+        slug: "principles-of-inheritance",
+        classLevel: 12,
+        historicalPriority: 98,
+        estimatedHours: 18,
+        hoursRange: "16–20 Hours",
+        defaultQuestionTarget: 180,
+        defaultPYQTarget: 90,
+        topics: [
+          "Mendel's Experiments: Monohybrid cross, Law of Dominance, Law of Segregation, Punnett square",
+          "Dihybrid cross and Law of Independent Assortment",
+          "Incomplete Dominance (Snapdragon / Antirrhinum) and Co-dominance (ABO blood groups)",
+          "Pleiotropy and Polygenic Inheritance (Human skin colour)",
+          "Chromosomal Theory of Inheritance (Sutton and Boveri)",
+          "Linkage and Recombination (T.H. Morgan experiments on Drosophila), Gene mapping",
+          "Sex Determination in Humans, Birds, Insects (Grasshopper), Honey bees (Haplodiploidy)",
+          "Mutation: Point mutation, Frame-shift mutation, Chromosomal aberrations",
+          "Pedigree Analysis and Mendelian Disorders: Haemophilia, Sickle-cell anaemia, Phenylketonuria, Thalassemia, Colour blindness",
+          "Chromosomal Disorders: Down's syndrome, Turner's syndrome, Klinefelter's syndrome"
+        ]
+      },
+      {
+        name: "Molecular Basis of Inheritance",
+        slug: "molecular-basis-of-inheritance",
+        classLevel: 12,
+        historicalPriority: 99,
+        estimatedHours: 20,
+        hoursRange: "18–22 Hours",
+        defaultQuestionTarget: 200,
+        defaultPYQTarget: 100,
+        topics: [
+          "DNA as Genetic Material: Griffith's Transformation experiment, Avery-MacLeod-McCarty experiment, Hershey-Chase experiment",
+          "Structure of DNA: Double helix model of Watson and Crick, Chargaff's rules, Packaging of DNA (Nucleosome, Euchromatin, Heterochromatin)",
+          "DNA Replication: Semiconservative replication, Meselson and Stahl experiment, Enzymes involved (DNA Polymerase, Helicase, Ligase)",
+          "Transcription: Transcription unit (Promoter, Structural gene, Terminator), Prokaryotic vs Eukaryotic transcription (Capping, Tailing, Splicing)",
+          "Genetic Code: Properties of genetic code, Wobble hypothesis, tRNA as adapter molecule",
+          "Translation: Aminoacylation of tRNA, Initiation, Elongation, Termination, Ribosome function",
+          "Regulation of Gene Expression: Operon concept, Lac Operon in E. coli (Inducer, Repressor, Promoter, Operator)",
+          "Human Genome Project (HGP): Goals, Methodologies (ESTs, Sequence Annotation), Features",
+          "DNA Fingerprinting: VNTRs, Southern Blotting technique, Applications in forensics"
+        ]
+      },
+      {
+        name: "Evolution",
+        slug: "evolution-bio",
+        classLevel: 12,
+        historicalPriority: 90,
+        estimatedHours: 12,
+        hoursRange: "10–14 Hours",
+        defaultQuestionTarget: 130,
+        defaultPYQTarget: 65,
+        topics: [
+          "Origin of Life: Big Bang theory, Miller-Urey experiment, Chemical evolution (Oparin-Haldane theory)",
+          "Evidences for Evolution: Paleontological, Comparative anatomy (Homologous & Analogous organs, Divergent & Convergent evolution), Embryological, Biochemical",
+          "Adaptive Radiation: Darwin's Finches, Australian Marsupials",
+          "Biological Evolution and Theories: Lamarckism, Darwinian Theory of Natural Selection, Mutation Theory of Hugo de Vries (Saltation)",
+          "Mechanism of Evolution: Hardy-Weinberg Principle, Factors affecting equilibrium (Gene flow, Genetic drift, Mutation, Recombination, Natural selection)",
+          "Types of Natural Selection: Stabilizing, Directional, Disruptive",
+          "Brief account of Evolution: Geological time scale, Evolution of plants and animals",
+          "Human Evolution: Dryopithecus, Ramapithecus, Australopithecines, Homo habilis, Homo erectus, Neanderthal man, Homo sapiens"
+        ]
+      },
+      {
+        name: "Human Health and Disease",
+        slug: "human-health-disease",
+        classLevel: 12,
+        historicalPriority: 94,
+        estimatedHours: 14,
+        hoursRange: "12–16 Hours",
+        defaultQuestionTarget: 150,
+        defaultPYQTarget: 75,
+        topics: [
+          "Common Pathogens and Infectious Diseases: Typhoid (Salmonella), Pneumonia, Common Cold, Malaria (Plasmodium lifecycle in mosquito & human), Amoebiasis, Ascariasis, Filariasis, Ringworm",
+          "Immunity: Innate immunity (Physical, Physiological, Cellular, Cytokine barriers)",
+          "Acquired Immunity: Humoral (B-lymphocytes, Antibodies structure: IgG, IgA, IgM, IgE, IgD) and Cell-Mediated (T-lymphocytes, Graft rejection)",
+          "Active vs Passive Immunity, Vaccination and Immunization",
+          "Allergies (IgE, Histamine, Mast cells) and Autoimmunity (Rheumatoid arthritis)",
+          "Immune System in Body: Primary lymphoid organs (Bone marrow, Thymus) and Secondary lymphoid organs (Spleen, Lymph nodes, MALT)",
+          "AIDS: Pathogen (HIV / Retrovirus), Transmission, Replication cycle (Reverse transcriptase), Symptoms, Diagnosis (ELISA), Prevention",
+          "Cancer: Types (Carcinoma, Sarcoma, Leukaemia), Transformation, Contact inhibition loss, Metastasis, Oncogenes, Detection, Treatment",
+          "Drugs and Alcohol Abuse: Opioids (Heroin/Morphine), Cannabinoids (Marijuana/Hashish), Coca alkaloids (Cocaine), Hallucinogens, Addiction and Adolescence"
+        ]
+      },
+      {
+        name: "Microbes in Human Welfare",
+        slug: "microbes-human-welfare",
+        classLevel: 12,
+        historicalPriority: 86,
+        estimatedHours: 8,
+        hoursRange: "6–10 Hours",
+        defaultQuestionTarget: 100,
+        defaultPYQTarget: 50,
+        topics: [
+          "Microbes in Household Food Processing: LAB (Curd), Baker's Yeast (Bread), Toddy, Cheese (Swiss cheese - Propionibacterium, Roquefort cheese)",
+          "Microbes in Industrial Products: Fermented Beverages, Antibiotics (Penicillin - Alexander Fleming), Organic acids (Citric, Acetic, Butyric, Lactic acid), Enzymes (Lipases, Streptokinase / Clot buster), Bioactive molecules (Cyclosporin A, Statins)",
+          "Microbes in Sewage Treatment: Primary treatment, Secondary (Biological) treatment, Activated sludge, BOD, Anaerobic sludge digesters",
+          "Microbes in Production of Biogas: Methanogens (Methanobacterium), Gobar gas plant design",
+          "Microbes as Biocontrol Agents: Bacillus thuringiensis (Bt), Trichoderma, Baculoviruses (NPV)",
+          "Microbes as Biofertilizers: Rhizobium, Azotobacter, Azospirillum, Mycorrhiza (Glomus), Cyanobacteria (Anabaena, Nostoc, Oscillatoria)"
+        ]
+      },
+      {
+        name: "Biotechnology: Principles and Processes",
+        slug: "biotechnology-principles",
+        classLevel: 12,
+        historicalPriority: 94,
+        estimatedHours: 12,
+        hoursRange: "10–14 Hours",
+        defaultQuestionTarget: 140,
+        defaultPYQTarget: 70,
+        topics: [
+          "Principles of Biotechnology: Genetic engineering and Bioprocess engineering",
+          "Tools of Recombinant DNA Technology: Restriction Enzymes (Endonucleases & Exonucleases, Palindromic sequences, Sticky ends)",
+          "DNA Ligase, Polymerases, and Modifying enzymes",
+          "Cloning Vectors: Characteristics (Ori, Selectable markers: ampR, tetR, Insertional inactivation, Cloning sites), pBR322 vector map, Ti plasmid of Agrobacterium, Retroviral vectors",
+          "Competent Host: Chemical treatment (CaCl2), Heat shock, Microinjection, Gene gun (Biolistics), Disarmed pathogen vectors",
+          "Processes of Recombinant DNA Technology: Isolation of Genetic material, Cutting DNA, Gel Electrophoresis (Agarose gel, EtBr staining, UV visualization, Elution)",
+          "Polymerase Chain Reaction (PCR): Denaturation, Annealing, Extension, Taq Polymerase",
+          "Insertion of Recombinant DNA into Host, Obtaining Foreign Gene Product, Bioreactors (Simple stirred-tank, Sparged stirred-tank), Downstream Processing"
+        ]
+      },
+      {
+        name: "Biotechnology and its Applications",
+        slug: "biotechnology-applications",
+        classLevel: 12,
+        historicalPriority: 92,
+        estimatedHours: 10,
+        hoursRange: "8–12 Hours",
+        defaultQuestionTarget: 120,
+        defaultPYQTarget: 60,
+        topics: [
+          "Biotechnological Applications in Agriculture: Bt Cotton (Cry genes: cryIAc, cryIIAb, cryIAb), Pest Resistant Plants (RNA interference / RNAi mechanism against Meloidogyne incognita in tobacco roots)",
+          "Biotechnological Applications in Medicine: Genetically Engineered Insulin (Humulin - Eli Lilly), Gene Therapy (ADA deficiency treatment)",
+          "Molecular Diagnosis: ELISA, PCR, Recombinant DNA probes",
+          "Transgenic Animals: Reasons for creation (Normal physiology, Study of disease, Biological products - alpha-1-antitrypsin, Rosie cow, Vaccine safety, Chemical safety testing)",
+          "Ethical Issues: GEAC, Biopiracy (Basmati rice, Neem, Turmeric patents)"
+        ]
+      },
+      {
+        name: "Organisms and Populations",
+        slug: "organisms-and-populations",
+        classLevel: 12,
+        historicalPriority: 90,
+        estimatedHours: 10,
+        hoursRange: "8–12 Hours",
+        defaultQuestionTarget: 120,
+        defaultPYQTarget: 60,
+        topics: [
+          "Organism and its Environment: Major abiotic factors (Temperature, Water, Light, Soil)",
+          "Responses to Abiotic Factors: Regulate (Homeostasis), Conform, Migrate, Suspend (Hibernation, Aestivation, Diapause)",
+          "Adaptations: Morphological, Physiological, and Behavioural adaptations (Kangaroo rat, Desert plants, Allen's rule, Altitude sickness)",
+          "Populations: Population Attributes (Birth rate, Death rate, Sex ratio, Age pyramids: Expanding, Stable, Declining)",
+          "Population Growth: Natality, Mortality, Immigration, Emigration; Exponential Growth (J-shaped curve) vs Logistic Growth (S-shaped / Verhulst-Pearl curve, Carrying capacity K)",
+          "Population Interactions: Mutualism, Commensalism, Parasitism (Ecto & Endoparasites, Brood parasitism), Predation, Competition (Gause's Competitive Exclusion Principle, Resource partitioning), Amensalism"
+        ]
+      },
+      {
+        name: "Ecosystem",
+        slug: "ecosystem",
+        classLevel: 12,
+        historicalPriority: 89,
+        estimatedHours: 10,
+        hoursRange: "8–12 Hours",
+        defaultQuestionTarget: 120,
+        defaultPYQTarget: 60,
+        topics: [
+          "Ecosystem Structure and Function: Terrestrial and Aquatic ecosystems, Productivity (GPP, NPP, Secondary productivity)",
+          "Decomposition: Steps (Fragmentation, Leaching, Catabolism, Humification, Mineralization) and factors affecting it",
+          "Energy Flow: Photosynthetically Active Radiation (PAR), Grazing Food Chain (GFC), Detritus Food Chain (DFC), 10% Law of Lindeman",
+          "Ecological Pyramids: Pyramid of Number, Pyramid of Biomass (Upright vs Inverted), Pyramid of Energy (Always upright), Limitations of ecological pyramids",
+          "Nutrient Cycling: Gaseous (Carbon cycle) and Sedimentary (Phosphorus cycle), Ecosystem Services"
+        ]
+      },
+      {
+        name: "Biodiversity and Conservation",
+        slug: "biodiversity-conservation",
+        classLevel: 12,
+        historicalPriority: 88,
+        estimatedHours: 8,
+        hoursRange: "6–10 Hours",
+        defaultQuestionTarget: 100,
+        defaultPYQTarget: 50,
+        topics: [
+          "Biodiversity: Genetic, Species, and Ecological diversity; Global species estimates (Robert May estimate)",
+          "Patterns of Biodiversity: Latitudinal gradients, Species-Area Relationships (Alexander von Humboldt, S = CA^z)",
+          "Importance of Species Diversity to Ecosystem: David Tilman experiments, Rivet Popper Hypothesis (Paul Ehrlich)",
+          "Loss of Biodiversity: Causes - The Evil Quartet (Habitat loss & fragmentation, Over-exploitation, Alien species invasions - Nile perch, Water hyacinth, Lantana, African catfish, Co-extinctions)",
+          "Biodiversity Conservation: Why conserve (Narrowly utilitarian, Broadly utilitarian, Ethical)",
+          "How to conserve: In-situ Conservation (Biosphere Reserves, National Parks, Sanctuaries, Sacred Groves, Biodiversity Hotspots - Western Ghats, Indo-Burma, Himalayas) and Ex-situ Conservation (Zoological parks, Botanical gardens, Cryopreservation, Seed banks)"
+        ]
+      }
+    ]
   }
 ];
